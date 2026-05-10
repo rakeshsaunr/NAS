@@ -1,0 +1,34 @@
+{
+  "user": "68a9979b72d2610a3a14eab6",
+  "items": [
+    {
+      "product": "68a9988cafa8da986fa36123",
+      "name": "iPhone 15 Pro",
+      "quantity": 1,
+      "price": 129999
+    },
+    {
+      "product": "68a9989cafa8da986fa36127",
+      "name": "Samsung Double Door Refrigerator",
+      "quantity": 1,
+      "price": 45000
+    }
+  ],
+  "shippingAddress": {
+    "fullName": "Admin User",
+    "address": "99 Corporate Park",
+    "city": "Bangalore",
+    "postalCode": "560001",
+    "country": "India",
+    "phone": "9876501234"
+  },
+  "paymentMethod": "cash_on_delivery",
+  "prices": {
+    "itemsPrice": 210000,
+    "taxPrice": 10000,
+    "shippingPrice": 0,
+    "totalPrice": 220000
+  },
+  "status": "pending",
+  "isPaid": false
+}
