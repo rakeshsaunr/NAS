@@ -1,30 +1,37 @@
-
-const BlogRepository = require('../repositories/blog-repository');
+const { BlogRepository } = require('../repositories');
 
 const blogRepository = new BlogRepository();
 
 async function createBlog(data) {
-    const blog = await blogRepository.create(data);
-    return blog;
+  return await blogRepository.create(data);
 }
 
 async function getAllBlogs() {
-    const blogs = await blogRepository.getAll();
-    return blogs;
+  return await blogRepository.getAll();
 }
 
 async function getBlog(id) {
-    const blog = await blogRepository.getById(id);
-    return blog;
+  const blog = await blogRepository.getById(id);
+  if (!blog) throw new Error('Blog not found');
+  return blog;
+}
+
+async function updateBlog(id, data) {
+  const updated = await blogRepository.update(id, data);
+  if (!updated) throw new Error('Blog not found or update failed');
+  return updated;
 }
 
 async function deleteBlog(id) {
-    return await blogRepository.delete(id);
+  const deleted = await blogRepository.delete(id);
+  if (!deleted) throw new Error('Blog not found or already deleted');
+  return deleted;
 }
 
 module.exports = {
-    createBlog,
-    getAllBlogs,
-    getBlog,
-    deleteBlog
+  createBlog,
+  getAllBlogs,
+  getBlog,
+  updateBlog,
+  deleteBlog,
 };

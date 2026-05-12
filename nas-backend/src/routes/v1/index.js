@@ -1,24 +1,21 @@
 const express = require('express');
 const router = express.Router();
 
-const authRoute = require('./user-routes');
-const categoryRoute = require('./category-route');
-const productRoute = require('./product-route');
-const orderRoute = require('./order-route');
-const bannerRoute = require('./banner-route');
-const coupanRoute = require('./coupan-route');
-const blogRoute = require('./blog-route');
-const contactRoute = require('./contact-route');
-const callslipRoute = require('./callslip-routes');
+const authRoutes = require('./auth-routes');
+const blogRoutes = require('./blog-routes');
+const contactRoutes = require('./contact-routes');
+const statRoutes = require('./stat-routes');
+const projectRoutes = require('./project-routes');
+const callslipRoutes = require('./callslip-routes');
+const servicecallRoutes = require('./servicecall-routes');
 
-router.use('/user', authRoute);
-router.use('/category', categoryRoute);
-router.use('/product', productRoute);
-router.use('/order', orderRoute);
-router.use('/banner', bannerRoute);
-router.use('/coupan', coupanRoute);
-router.use('/blog', blogRoute);
-router.use('/contact', contactRoute);
-router.use('/callslip', callslipRoute);
+// Register routes
+router.use('/auth', authRoutes);
+router.use('/blog', blogRoutes);
+router.use('/contact', contactRoutes);
+router.use('/stat', statRoutes);
+router.use('/project', projectRoutes);
+router.use('/callslip', callslipRoutes);
+router.use('/servicecall', servicecallRoutes);
 
 module.exports = router;

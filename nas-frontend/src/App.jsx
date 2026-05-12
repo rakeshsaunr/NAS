@@ -20,6 +20,7 @@ import Profile from "./components/pages/dashboard/settings/Profile";
 import Support from "./components/pages/dashboard/Support";
 import Security from "./components/pages/dashboard/settings/Security";
 import Login from "./components/auth/Login";
+import Signup from "./components/auth/Signup";
 import TwoFa from "./components/auth/TwoFa";
 import DashboardLayout from "./components/pages/components/DashboardLayout";
 import Dashboard from "./components/pages/Dashboard";
@@ -27,15 +28,10 @@ import Settings from "./components/pages/dashboard/Settings";
 import Users from "./components/pages/dashboard/Users";
 import Blogs from "./components/pages/dashboard/Blogs";
 import Project from "./components/pages/dashboard/Project";
-import Experiences from "./components/pages/dashboard/Experiences";
-// REMOVE the Skill, Testimonials, CourseMaterial imports
-// import Skill from "./components/pages/dashboard/Skill";
-// import Testimonials from "./components/pages/dashboard/Testimonials";
-// import CourseMaterial from "./components/pages/dashboard/CourseMaterial";
-import Service from "./components/pages/dashboard/Service";
-import CallSlip from "./components/pages/dashboard/CallSlip"; // CallSlip import karo
+// Correct ServiceCall import for "/dashboard/service-call"
+import ServiceCall from "./components/pages/dashboard/ServiceCall";
+import CallSlip from "./components/pages/dashboard/CallSlip";
 
-// Correct import for ProtectedRoute
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function AppContent() {
@@ -64,6 +60,8 @@ function AppContent() {
 
         {/* Login Route - Accessible without authentication */}
         <Route path="/login" element={<Login />} />
+        {/* Signup Route - Accessible without authentication */}
+        <Route path="/signup" element={<Signup />} />
         {/* TwoFa Route - Accessible without authentication */}
         <Route path="/twofa" element={<TwoFa />} />
 
@@ -148,25 +146,13 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        {/* Correct service call route */}
         <Route
-          path="/dashboard/experiences"
+          path="/dashboard/service-call"
           element={
             <ProtectedRoute>
               <DashboardLayout>
-                <Experiences />
-              </DashboardLayout>
-            </ProtectedRoute>
-          }
-        />
-        {/* Removed Skill Route */}
-        {/* Removed Testimonials Route */}
-        {/* Removed CourseMaterial Route */}
-        <Route
-          path="/dashboard/service"
-          element={
-            <ProtectedRoute>
-              <DashboardLayout>
-                <Service />
+                <ServiceCall />
               </DashboardLayout>
             </ProtectedRoute>
           }

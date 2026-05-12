@@ -1,51 +1,43 @@
-
+// src/repositories/crud-repository.js
 class CrudRepository {
     constructor(model) {
-        this.model = model;
+      if (!model) throw new Error('Model must be provided to repository');
+      this.model = model;
     }
-
+  
     async create(data) {
-        try {
-            const document = new this.model(data);
-            return await document.save();
-        } catch (error) {
-            throw error;
-        }
+      return this.model.create(data);
     }
-
-    async getById(id) {
-        try {
-            return await this.model.findById(id);
-        } catch (error) {
-            throw error;
-        }
+  
+    async findById(id) {
+      return this.model.findById(id);
     }
-
-    async getAll(filter = {}) {
-        try {
-            return await this.model.find(filter);
-        } catch (error) {
-            throw error;
-        }
+  
+    async findAll(filter = {}, projection = null, options = {}) {
+      return this.model.find(filter, projection, options).sort({ createdAt: -1 });
     }
-
-    async update(id, data) {
-        try {
-            return await this.model.findByIdAndUpdate(id, data, { 
-                new: true,
-                runValidators:true });
-        } catch (error) {
-            throw error;
-        }
+  
+    // Backwards-compatible alias for older code that calls getAll()
+    async getAll(filter = {}, projection = null, options = {}) {
+      return this.findAll(filter, projection, options);
     }
-
+  
+    async findOne(filter = {}) {
+      return this.model.findOne(filter);
+    }
+  
+    async update(id, data = {}) {
+      return this.model.findByIdAndUpdate(id, data, { new: true });
+    }
+  
     async delete(id) {
-        try {
-            return await this.model.findByIdAndDelete(id);
-        } catch (error) {
-            throw error;
-        }
+      return this.model.findByIdAndDelete(id);
     }
-}
-
-module.exports = CrudRepository;
+  
+    async count(filter = {}) {
+      return this.model.countDocuments(filter);
+    }
+  }
+  
+  module.exports = CrudRepository;
+  

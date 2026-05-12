@@ -6,6 +6,10 @@ const blogSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    tagline: {
+        type: String,
+        required: false
+    },
     description: {
         type: String,
         required: true
@@ -23,4 +27,4 @@ const blogSchema = new mongoose.Schema({
     }
 })
 
-module.exports = mongoose.model('Blog',blogSchema)
+module.exports = mongoose.model('Blog', blogSchema)

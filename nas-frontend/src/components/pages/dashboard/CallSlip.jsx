@@ -1,20 +1,68 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin5Line } from "react-icons/ri";
 
-const API_BASE = "http://localhost:3000/api/v1/callslip";
+const API_BASE = "http://localhost:5000/api/v1/callslip";
+
+const paymentModes = [
+  "",
+  "Cash",
+  "Cheque",
+  "Bank Transfer",
+  "UPI",
+  "Card",
+  "Other",
+];
+
+const paymentStatuses = [
+  "",
+  "Paid",
+  "Unpaid",
+  "Pending",
+  "Partial",
+  "Failed",
+  "Refunded",
+];
+
+// Dropdown options for Department and Complaint Type
+const departmentOptions = [
+  "",
+  "Sales",
+  "Service",
+  "Support",
+  "Admin",
+  "Accounts",
+  "IT",
+  "Logistics",
+  "Purchase",
+  "Operations",
+  "Other",
+];
+
+const complaintTypeOptions = [
+  "",
+  "Installation",
+  "Maintenance",
+  "Service",
+  "Product Defect",
+  "AMC Visit",
+  "Technical Query",
+  "Other"
+];
 
 const initialForm = {
-  customerName: '',
-  department: '',
-  companyName: '',
-  contactNumber: '',
-  email: '',
-  address: '',
-  callNumber: '',
-  callDate: '',
-  callTime: '',
+  customerName: "",
+  department: "",
+  departmentOther: "",
+  companyName: "",
+  contactNumber: "",
+  email: "",
+  address: "",
+  callNumber: "",
+  callDate: "",
+  callTime: "",
+
   callType: {
     projectWork: false,
     installation: false,
@@ -23,12 +71,14 @@ const initialForm = {
     serviceCall: false,
     siteSurvey: false,
   },
+
   charges: {
-    serviceCharges: '',
-    totalAmount: '',
-    paymentMode: '',
-    paymentStatus: '',
+    serviceCharges: "",
+    totalAmount: "",
+    paymentMode: "",
+    paymentStatus: "",
   },
+
   products: {
     cctv: false,
     biometric: false,
@@ -37,44 +87,80 @@ const initialForm = {
     epabx: false,
     automation: false,
   },
-  complaintType: '',
-  problemDescription: '',
-  serviceDetails: '',
-  errorDetails: '',
-  priorityLevel: 'Low',
-  loggedBy: '',
+
+  complaintType: "",
+  problemDescription: "",
+  serviceDetails: "",
+  errorDetails: "",
+  priorityLevel: "Low",
+  loggedBy: "",
 };
 
-const priorityLevels = ['Low', 'Medium', 'High', 'Urgent'];
+const priorityLevels = ["Low", "Medium", "High", "Urgent"];
 
 function buildCallSlipPayload(form) {
   return {
     ...form,
-    callType: { ...form.callType },
-    charges: { ...form.charges },
-    products: { ...form.products },
+
+    // For plain input, no need for other field, just send department as it is
+    department: form.department,
+
+    charges: {
+      ...form.charges,
+
+      serviceCharges:
+        form.charges.serviceCharges === ""
+          ? 0
+          : Number(form.charges.serviceCharges),
+
+      totalAmount:
+        form.charges.totalAmount === ""
+          ? 0
+          : Number(form.charges.totalAmount),
+    },
+
+    callType: {
+      ...initialForm.callType,
+      ...form.callType,
+    },
+
+    products: {
+      ...initialForm.products,
+      ...form.products,
+    },
   };
 }
 
 const CallSlip = () => {
   const [callSlips, setCallSlips] = useState([]);
   const [form, setForm] = useState(initialForm);
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Fetch call slips (like projects)
+  // ================= FETCH =================
   const fetchCallSlips = async () => {
     setLoading(true);
+
     try {
       const res = await axios.get(API_BASE);
-      setCallSlips(res.data?.data || []);
-    } catch (err) {
-      console.error("Fetch call slips error:", err);
-      setFormError("Failed to fetch call slips.");
+
+      console.log("GET RESPONSE =>", res.data);
+
+      let slips = [];
+
+      if (Array.isArray(res.data)) {
+        slips = res.data;
+      } else if (Array.isArray(res.data.data)) {
+        slips = res.data.data;
+      } else if (Array.isArray(res.data.callSlips)) {
+        slips = res.data.callSlips;
+      }
+
+      setCallSlips(slips);
+    } catch (error) {
+      console.log("FETCH ERROR =>", error);
     } finally {
       setLoading(false);
     }
@@ -84,11 +170,13 @@ const CallSlip = () => {
     fetchCallSlips();
   }, []);
 
-  // Handle input & checkbox changes
+  // ================= INPUT CHANGE =================
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    if (name.startsWith('callType.')) {
-      const key = name.split('.')[1];
+    const { name, value, checked } = e.target;
+
+    if (name.startsWith("callType.")) {
+      const key = name.split(".")[1];
+
       setForm((prev) => ({
         ...prev,
         callType: {
@@ -96,17 +184,9 @@ const CallSlip = () => {
           [key]: checked,
         },
       }));
-    } else if (name.startsWith('charges.')) {
-      const key = name.split('.')[1];
-      setForm((prev) => ({
-        ...prev,
-        charges: {
-          ...prev.charges,
-          [key]: type === "number" ? Number(value) : value,
-        }
-      }));
-    } else if (name.startsWith('products.')) {
-      const key = name.split('.')[1];
+    } else if (name.startsWith("products.")) {
+      const key = name.split(".")[1];
+
       setForm((prev) => ({
         ...prev,
         products: {
@@ -114,415 +194,597 @@ const CallSlip = () => {
           [key]: checked,
         },
       }));
+    } else if (name.startsWith("charges.")) {
+      const key = name.split(".")[1];
+
+      setForm((prev) => ({
+        ...prev,
+        charges: {
+          ...prev.charges,
+          [key]: value,
+        },
+      }));
     } else {
       setForm((prev) => ({
         ...prev,
-        [name]:
-          type === 'checkbox' ? checked
-          : type === 'number' ? Number(value)
-          : value,
+        [name]: value,
       }));
     }
-    setFormError("");
   };
 
-  const handleEdit = (slip) => {
-    setEditId(slip._id);
-    setForm({
-      ...slip,
-      callType: { ...initialForm.callType, ...slip.callType },
-      charges: { ...initialForm.charges, ...slip.charges },
-      products: { ...initialForm.products, ...slip.products },
-    });
-    setShowForm(true);
-    setFormError('');
-    setSuccessMsg('');
-  };
-
-  const handleCancelEdit = () => {
-    setEditId(null);
+  // ================= NEW =================
+  const handleNewCallSlip = () => {
     setForm(initialForm);
-    setShowForm(false);
-    setFormError('');
-    setSuccessMsg('');
+    setEditId(null);
+    setShowForm(true);
   };
 
-  // Delete slip
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this call slip?")) return;
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`${API_BASE}/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      fetchCallSlips();
-    } catch (err) {
-      alert("Failed to delete. Please try again.");
-    }
-  };
-
+  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setFormError("");
-    setSuccessMsg("");
-    if (!form.customerName.trim()) {
-      setFormError("Customer Name is required");
-      return;
-    }
 
     setSubmitting(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setFormError("You must be logged in to submit a call slip.");
-        setSubmitting(false);
-        return;
-      }
 
+    try {
       const payload = buildCallSlipPayload(form);
 
+      let res;
+
       if (editId) {
-        await axios.put(`${API_BASE}/${editId}`, payload, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          }
-        });
-        setSuccessMsg("Call Slip updated successfully!");
+        res = await axios.put(`${API_BASE}/${editId}`, payload);
       } else {
-        await axios.post(API_BASE, payload, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          }
-        });
-        setSuccessMsg("Call Slip submitted successfully!");
+        res = await axios.post(API_BASE, payload);
       }
+
+      console.log("SAVE RESPONSE =>", res.data);
+
+      // Save hone ke baad latest data fetch
+      await fetchCallSlips();
+
       setForm(initialForm);
       setEditId(null);
       setShowForm(false);
-      fetchCallSlips();
-    } catch (err) {
-      setFormError(
-        err?.response?.data?.message ||
-        "Submission failed, please try again."
+    } catch (error) {
+      console.log("SAVE ERROR =>", error);
+
+      alert(
+        error?.response?.data?.message || "Something went wrong"
       );
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ================= EDIT =================
+  const handleEdit = (slip) => {
+    setEditId(slip._id);
+
+    setForm({
+      ...initialForm,
+      ...slip,
+
+      // No need to handle departmentOther, just keep department as plain text
+      callType: {
+        ...initialForm.callType,
+        ...slip.callType,
+      },
+
+      products: {
+        ...initialForm.products,
+        ...slip.products,
+      },
+
+      charges: {
+        ...initialForm.charges,
+        ...slip.charges,
+
+        serviceCharges:
+          slip.charges?.serviceCharges !== undefined
+            ? String(slip.charges.serviceCharges)
+            : "",
+
+        totalAmount:
+          slip.charges?.totalAmount !== undefined
+            ? String(slip.charges.totalAmount)
+            : "",
+      },
+    });
+
+    setShowForm(true);
+  };
+
+  // ================= DELETE =================
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Delete this call slip?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await axios.delete(`${API_BASE}/${id}`);
+
+      setCallSlips((prev) =>
+        prev.filter((item) => item._id !== id)
+      );
+    } catch (error) {
+      console.log("DELETE ERROR =>", error);
+    }
+  };
+
+  // List of columns for table
+  const tableColumns = [
+    { label: "Action", key: "actions" },
+    { label: "Customer Name", key: "customerName" },
+    { label: "Company", key: "companyName" },
+    { label: "Contact", key: "contactNumber" },
+    { label: "Department", key: "department" },
+    { label: "Complaint Type", key: "complaintType" },
+    { label: "Priority", key: "priorityLevel" },
+    { label: "Total Amount", key: "charges.totalAmount" },
+    { label: "Payment Mode", key: "charges.paymentMode" },
+    { label: "Payment Status", key: "charges.paymentStatus" },
+    { label: "Call Date", key: "callDate" },
+    { label: "Call Time", key: "callTime" },
+    { label: "Call Number", key: "callNumber" },
+    { label: "Logged By", key: "loggedBy" },
+    { label: "Service Charges", key: "charges.serviceCharges" },
+    { label: "Problem Description", key: "problemDescription" },
+    { label: "Service Details", key: "serviceDetails" },
+    { label: "Error Details", key: "errorDetails" },
+    { label: "Call Type", key: "callType" },
+    { label: "Products", key: "products" },
+    { label: "Email", key: "email" },
+    { label: "Address", key: "address" },
+  ];
+
+  // Helper for nested value retrieval
+  function getValueByKey(obj, keyPath) {
+    if (typeof keyPath !== "string") return "";
+    if (keyPath === "callType") {
+      if (!obj.callType) return "";
+      // Show checked call types as comma separated
+      return Object.entries(obj.callType)
+        .filter(([k, v]) => v)
+        .map(([k]) => k)
+        .join(", ");
+    }
+    if (keyPath === "products") {
+      if (!obj.products) return "";
+      // Show checked products as comma separated
+      return Object.entries(obj.products)
+        .filter(([k, v]) => v)
+        .map(([k]) => k)
+        .join(", ");
+    }
+    if (keyPath.includes(".")) {
+      const keys = keyPath.split(".");
+      let value = obj;
+      for (const k of keys) {
+        value = value ? value[k] : undefined;
+      }
+      return value === undefined ? "" : value;
+    }
+    return obj[keyPath] === undefined ? "" : obj[keyPath];
+  }
+
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-2 sm:px-4 md:px-8">
-      <div className="max-w-3xl mx-auto">
-        {/* Top bar */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Call Slips</h2>
-          <button
-            onClick={() => {
-              setShowForm(f => !f);
-              setForm(initialForm);
-              setEditId(null);
-              setFormError('');
-              setSuccessMsg('');
-            }}
-            className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded shadow font-bold transition"
-          >
-            {showForm ? (editId ? "Cancel Edit" : "Close Form") : "Add New"}
-          </button>
+    <div className="min-h-screen bg-gray-100 p-5">
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-5">
+        <div>
+          <h2 className="text-3xl font-semibold text-gray-800">
+            Call Management
+          </h2>
+
+          <p className="text-gray-500">
+            Manage all service requests
+          </p>
         </div>
 
-        {/* Form area modal style */}
-        {showForm && (
-          <div className="fixed z-30 inset-0 bg-black bg-opacity-30 flex items-center justify-center animate-fade-in">
-            <div className="bg-white rounded-md p-6 w-full max-w-lg relative shadow-md">
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <h3 className="text-xl font-semibold mb-2">{editId ? 'Update Call Slip' : 'New Call Slip'}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="font-medium">Customer Name<span className="text-pink-600">*</span></label>
-                    <input name="customerName" value={form.customerName} onChange={handleChange} required className="input"/>
-                  </div>
-                  <div>
-                    <label className="font-medium">Department</label>
-                    <input name="department" value={form.department} onChange={handleChange} className="input"/>
-                  </div>
-                  <div>
-                    <label className="font-medium">Company Name</label>
-                    <input name="companyName" value={form.companyName} onChange={handleChange} className="input"/>
-                  </div>
-                  <div>
-                    <label className="font-medium">Contact Number</label>
-                    <input name="contactNumber" value={form.contactNumber} onChange={handleChange} type="tel" className="input"/>
-                  </div>
-                  <div>
-                    <label className="font-medium">Email</label>
-                    <input name="email" value={form.email} onChange={handleChange} type="email" className="input"/>
-                  </div>
-                  <div>
-                    <label className="font-medium">Address</label>
-                    <input name="address" value={form.address} onChange={handleChange} className="input"/>
-                  </div>
-                  <div>
-                    <label className="font-medium">Call Number</label>
-                    <input name="callNumber" value={form.callNumber} onChange={handleChange} className="input"/>
-                  </div>
-                  <div>
-                    <label className="font-medium">Call Date</label>
-                    <input name="callDate" value={form.callDate} onChange={handleChange} type="date" className="input"/>
-                  </div>
-                  <div>
-                    <label className="font-medium">Call Time</label>
-                    <input name="callTime" value={form.callTime} onChange={handleChange} type="time" className="input"/>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-medium mb-1">Call Type</label>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.keys(initialForm.callType).map((key) => (
-                      <label key={key} className="inline-flex items-center gap-1">
-                        <input
-                          type="checkbox"
-                          name={`callType.${key}`}
-                          checked={form.callType[key]}
-                          onChange={handleChange}
-                          className="accent-pink-600"
-                        />
-                        <span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block font-medium mb-1">Products</label>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.keys(initialForm.products).map((key) => (
-                      <label key={key} className="inline-flex items-center gap-1">
-                        <input
-                          type="checkbox"
-                          name={`products.${key}`}
-                          checked={form.products[key]}
-                          onChange={handleChange}
-                          className="accent-pink-600"
-                        />
-                        <span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="font-medium">Service Charges</label>
-                    <input
-                      name="charges.serviceCharges"
-                      value={form.charges.serviceCharges}
-                      onChange={handleChange}
-                      type="number"
-                      className="input"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-medium">Total Amount</label>
-                    <input
-                      name="charges.totalAmount"
-                      value={form.charges.totalAmount}
-                      onChange={handleChange}
-                      type="number"
-                      className="input"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-medium">Payment Mode</label>
-                    <input
-                      name="charges.paymentMode"
-                      value={form.charges.paymentMode}
-                      onChange={handleChange}
-                      className="input"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-medium">Payment Status</label>
-                    <input
-                      name="charges.paymentStatus"
-                      value={form.charges.paymentStatus}
-                      onChange={handleChange}
-                      className="input"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="font-medium">Complaint Type</label>
-                  <input name="complaintType" value={form.complaintType} onChange={handleChange} className="input"/>
-                </div>
-                <div>
-                  <label className="font-medium">Problem Description</label>
-                  <textarea name="problemDescription" value={form.problemDescription} onChange={handleChange} className="input"/>
-                </div>
-                <div>
-                  <label className="font-medium">Service Details</label>
-                  <textarea name="serviceDetails" value={form.serviceDetails} onChange={handleChange} className="input"/>
-                </div>
-                <div>
-                  <label className="font-medium">Error Details</label>
-                  <textarea name="errorDetails" value={form.errorDetails} onChange={handleChange} className="input"/>
-                </div>
-                <div>
-                  <label className="font-medium">Priority Level</label>
-                  <select name="priorityLevel" value={form.priorityLevel} onChange={handleChange} className="input">
-                    {priorityLevels.map((level) => (
-                      <option key={level} value={level}>{level}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="font-medium">Logged By</label>
-                  <input name="loggedBy" value={form.loggedBy} onChange={handleChange} className="input"/>
-                </div>
-
-                {formError && <div className="text-red-600 text-sm">{formError}</div>}
-                {successMsg && <div className="text-green-600 text-sm">{successMsg}</div>}
-
-                <div className="flex gap-3 justify-end mt-2">
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded shadow font-semibold transition disabled:opacity-60"
-                  >
-                    {submitting ? (editId ? "Updating..." : "Submitting...") : (editId ? "Update" : "Submit")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancelEdit}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded font-semibold"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Calls List */}
-        <div className="bg-white rounded-md shadow p-4">
-          {loading ? (
-            <div className="text-gray-800">Loading call slips...</div>
-          ) : (
-            callSlips.length === 0 ? (
-              <div className="text-gray-600">No call slips found.</div>
-            ) : (
-              <div className="grid gap-4">
-                {callSlips.map((slip) => (
-                  <div
-                    key={slip._id || slip.callNumber}
-                    className="relative border rounded-md p-4 pb-4 bg-gray-50 shadow flex flex-col gap-2"
-                  >
-                    {/* Buttons */}
-                    <div className="flex w-full justify-end gap-2 mb-2 md:mb-0 md:absolute md:top-2 md:right-2 z-10 blog-action-btns">
-                      <button
-                        onClick={() => handleEdit(slip)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-1.5 shadow transition h-8 w-8 flex items-center justify-center"
-                        title="Update"
-                      >
-                        <FaRegEdit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(slip._id)}
-                        className="bg-red-500 hover:bg-red-600 text-white rounded-full p-1.5 shadow transition h-8 w-8 flex items-center justify-center"
-                        title="Delete"
-                      >
-                        <RiDeleteBin5Line className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="flex flex-col md:flex-row gap-3 items-start">
-                      <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-gray-800 mb-1">{slip.customerName}</h3>
-                        <div className="text-gray-700 mb-1 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-                          <span><strong>Company:</strong> {slip.companyName || <span className="text-gray-400">N/A</span>}</span>
-                          <span><strong>Contact:</strong> {slip.contactNumber || <span className="text-gray-400">N/A</span>}</span>
-                          <span><strong>Date:</strong> {slip.callDate || <span className="text-gray-400">N/A</span>}</span>
-                          <span><strong>Priority:</strong> <span className={
-                            slip.priorityLevel === 'High' ? 'text-red-600 font-bold'
-                              : slip.priorityLevel === 'Urgent' ? 'text-red-700 font-extrabold'
-                              : slip.priorityLevel === 'Medium' ? 'text-yellow-600 font-medium'
-                              : 'text-gray-700 font-normal'
-                          }>{slip.priorityLevel}</span></span>
-                        </div>
-                        <div className="text-gray-600 mb-2"><strong>Department:</strong> {slip.department}</div>
-                        <div className="flex flex-wrap gap-3 text-xs mb-1">
-                          <span className="bg-pink-100 px-2 py-0.5 rounded-full">
-                            {Object.entries(slip.callType || {}).filter(([k,v])=>v).map(([k])=>k.charAt(0).toUpperCase()+k.slice(1)).join(", ") || 'No Call Type'}
-                          </span>
-                          <span className="bg-blue-100 px-2 py-0.5 rounded-full">
-                            {Object.entries(slip.products || {}).filter(([k,v])=>v).map(([k])=>k.charAt(0).toUpperCase()+k.slice(1)).join(", ") || 'No Product'}
-                          </span>
-                        </div>
-                        <div className="text-gray-700 break-words mb-1">
-                          <strong>Complaint Type:</strong> {slip.complaintType}
-                        </div>
-                        {slip.problemDescription && (
-                          <div className="text-gray-600 text-sm"><strong>Problem:</strong> {slip.problemDescription}</div>
-                        )}
-                        {slip.serviceDetails && (
-                          <div className="text-gray-600 text-sm"><strong>Service:</strong> {slip.serviceDetails}</div>
-                        )}
-                        {slip.errorDetails && (
-                          <div className="text-gray-600 text-sm"><strong>Error:</strong> {slip.errorDetails}</div>
-                        )}
-                        <div className="mt-2 text-xs text-gray-500">
-                          <span><strong>Logged By:</strong> {slip.loggedBy || <span className="text-gray-400">N/A</span>}</span>
-                          {slip.callNumber && <span className="ml-3"><strong>Call #:</strong> {slip.callNumber}</span>}
-                          {slip.callTime && <span className="ml-3"><strong>Time:</strong> {slip.callTime}</span>}
-                        </div>
-                        {/* Charges block */}
-                        {(slip.charges && (slip.charges.serviceCharges || slip.charges.totalAmount)) && (
-                          <div className="mt-2">
-                            <span className="inline-block bg-green-100 text-green-700 rounded px-2 py-0.5 mr-2">
-                              Charges: {slip.charges.serviceCharges} / Total: {slip.charges.totalAmount}
-                            </span>
-                            <span className="inline-block bg-yellow-100 text-yellow-800 rounded px-2 py-0.5 mr-2">
-                              {slip.charges.paymentMode} ({slip.charges.paymentStatus})
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )
-          )}
-        </div>
-
-        {/* Simple fade-in animation for modal */}
-        <style>{`
-          .animate-fade-in {
-            animation: fadeIn 0.18s;
-          }
-          @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.98);}
-            to { opacity: 1; transform: scale(1);}
-          }
-          .input {
-            @apply w-full border-gray-300 focus:border-pink-500 focus:ring-pink-200 rounded px-3 py-1.5 text-gray-800 text-sm shadow-sm border;
-          }
-          .blog-action-btns {
-            /* Used for responsive action buttons similar to Project.jsx */
-          }
-          @media (max-width: 767px) {
-            .blog-action-btns {
-              position: static !important;
-              margin-bottom: 0.5rem !important;
-            }
-          }
-        `}</style>
+        <button
+          onClick={handleNewCallSlip}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md text-xs"
+          style={{ fontSize: "0.75rem" }}
+        >
+          + New Call Slip
+        </button>
+   
+   
       </div>
+
+      {/* LOADING */}
+      {loading ? (
+        <div className="text-center py-10 text-lg">
+          Loading...
+        </div>
+      ) : (
+        <>
+          {/* EMPTY */}
+          {callSlips.length === 0 ? (
+            <div className="bg-white rounded-xl p-10 text-center shadow">
+              <h2 className="text-xl font-semibold text-gray-700">
+                No Call Slips Found
+              </h2>
+            </div>
+          ) : (
+            // TABLE
+            <div className="bg-white rounded-xl p-4 shadow overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 text-sm">
+                <thead>
+                  <tr>
+                    {tableColumns.map((col) => (
+                      <th
+                        key={col.key}
+                        className="px-4 py-2 font-semibold text-left bg-gray-50 text-gray-700"
+                      >
+                        {col.label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {callSlips.map((slip, index) => (
+                    <tr
+                      key={slip._id || index}
+                      className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+                    >
+                      {tableColumns.map((col) =>
+                        col.key === "actions" ? (
+                          <td
+                            key={col.key}
+                            className="px-3 py-2 whitespace-nowrap"
+                            style={{ minWidth: 90 }}
+                          >
+                            <button
+                              onClick={() => handleEdit(slip)}
+                              title="Edit"
+                              className="bg-blue-100 text-blue-600 p-2 rounded-lg mr-2"
+                            >
+                              <FaRegEdit />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(slip._id)}
+                              title="Delete"
+                              className="bg-red-100 text-red-600 p-2 rounded-lg"
+                            >
+                              <RiDeleteBin5Line />
+                            </button>
+                          </td>
+                        ) : (
+                          <td key={col.key} className="px-3 py-2">
+                            {
+                              col.key === "charges.totalAmount" ? (
+                                (
+                                  slip.charges &&
+                                  slip.charges.totalAmount !== undefined &&
+                                  slip.charges.totalAmount !== ""
+                                )
+                                  ? `₹ ${slip.charges.totalAmount}`
+                                  : ""
+                              )
+                              : getValueByKey(slip, col.key)
+                            }
+                          </td>
+                        )
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* MODAL */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center p-4 z-50">
+          <div className="bg-white w-full max-w-4xl rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
+            {/* TOP */}
+            <div className="flex justify-between items-center mb-5">
+              <h2 className="text-2xl font-bold">
+                {editId
+                  ? "Update Call Slip"
+                  : "New Call Slip"}
+              </h2>
+
+              <button
+                onClick={() => setShowForm(false)}
+                className="text-xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* FORM */}
+            <form
+              onSubmit={handleSubmit}
+              className="grid md:grid-cols-2 gap-4"
+            >
+              <input
+                name="customerName"
+                placeholder="Customer Name"
+                className="input"
+                value={form.customerName}
+                onChange={handleChange}
+              />
+
+              <input
+                name="department"
+                placeholder="Department"
+                className="input"
+                value={form.department}
+                onChange={handleChange}
+              />
+
+              <input
+                name="companyName"
+                placeholder="Company Name"
+                className="input"
+                value={form.companyName}
+                onChange={handleChange}
+              />
+
+              <input
+                name="contactNumber"
+                placeholder="Contact Number"
+                className="input"
+                value={form.contactNumber}
+                onChange={handleChange}
+              />
+
+              <input
+                name="email"
+                placeholder="Email"
+                className="input"
+                value={form.email}
+                onChange={handleChange}
+              />
+
+              <input
+                name="address"
+                placeholder="Address"
+                className="input"
+                value={form.address}
+                onChange={handleChange}
+              />
+
+              <input
+                name="callNumber"
+                placeholder="Call Number"
+                className="input"
+                value={form.callNumber}
+                onChange={handleChange}
+              />
+
+              <input
+                type="date"
+                name="callDate"
+                className="input"
+                value={form.callDate}
+                onChange={handleChange}
+              />
+
+              <input
+                type="time"
+                name="callTime"
+                className="input"
+                value={form.callTime}
+                onChange={handleChange}
+              />
+
+              <select
+                name="priorityLevel"
+                className="input"
+                value={form.priorityLevel}
+                onChange={handleChange}
+              >
+                {priorityLevels.map((item) => (
+                  <option key={item}>{item}</option>
+                ))}
+              </select>
+
+              <input
+                name="loggedBy"
+                placeholder="Logged By"
+                className="input"
+                value={form.loggedBy}
+                onChange={handleChange}
+              />
+
+              <select
+                name="complaintType"
+                className="input"
+                value={form.complaintType}
+                onChange={handleChange}
+              >
+                <option value="">Select Complaint Type</option>
+                {complaintTypeOptions
+                  .filter((type) => type !== "")
+                  .map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+              </select>
+
+              <input
+                name="problemDescription"
+                placeholder="Problem Description"
+                className="input"
+                value={form.problemDescription}
+                onChange={handleChange}
+              />
+
+              <input
+                name="serviceDetails"
+                placeholder="Service Details"
+                className="input"
+                value={form.serviceDetails}
+                onChange={handleChange}
+              />
+
+              <input
+                name="errorDetails"
+                placeholder="Error Details"
+                className="input"
+                value={form.errorDetails}
+                onChange={handleChange}
+              />
+
+              {/* CHARGES */}
+              <input
+                type="number"
+                name="charges.serviceCharges"
+                placeholder="Service Charges"
+                className="input"
+                value={form.charges.serviceCharges}
+                onChange={handleChange}
+              />
+
+              <input
+                type="number"
+                name="charges.totalAmount"
+                placeholder="Total Amount"
+                className="input"
+                value={form.charges.totalAmount}
+                onChange={handleChange}
+              />
+
+              {/* Payment Mode as Dropdown */}
+              <select
+                name="charges.paymentMode"
+                className="input"
+                value={form.charges.paymentMode}
+                onChange={handleChange}
+              >
+                <option value="">Select Payment Mode</option>
+                {paymentModes
+                  .filter((m) => m !== "")
+                  .map((mode) => (
+                    <option key={mode} value={mode}>
+                      {mode}
+                    </option>
+                  ))}
+              </select>
+
+              {/* Payment Status as Dropdown */}
+              <select
+                name="charges.paymentStatus"
+                className="input"
+                value={form.charges.paymentStatus}
+                onChange={handleChange}
+              >
+                <option value="">Select Payment Status</option>
+                {paymentStatuses
+                  .filter((status) => status !== "")
+                  .map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+              </select>
+
+              {/* CALL TYPE */}
+              <div className="md:col-span-2">
+                <h3 className="font-semibold mb-2">
+                  Call Type
+                </h3>
+
+                <div className="flex flex-wrap gap-4">
+                  {Object.keys(initialForm.callType).map(
+                    (type) => (
+                      <label
+                        key={type}
+                        className="flex items-center gap-2"
+                      >
+                        <input
+                          type="checkbox"
+                          name={`callType.${type}`}
+                          checked={form.callType[type]}
+                          onChange={handleChange}
+                        />
+
+                        {type}
+                      </label>
+                    )
+                  )}
+                </div>
+              </div>
+
+              {/* PRODUCTS */}
+              <div className="md:col-span-2">
+                <h3 className="font-semibold mb-2">
+                  Products
+                </h3>
+
+                <div className="flex flex-wrap gap-4">
+                  {Object.keys(initialForm.products).map(
+                    (product) => (
+                      <label
+                        key={product}
+                        className="flex items-center gap-2"
+                      >
+                        <input
+                          type="checkbox"
+                          name={`products.${product}`}
+                          checked={form.products[product]}
+                          onChange={handleChange}
+                        />
+
+                        {product}
+                      </label>
+                    )
+                  )}
+                </div>
+              </div>
+
+              {/* BUTTON */}
+              <div className="md:col-span-2 mt-4">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl"
+                >
+                  {submitting
+                    ? "Saving..."
+                    : "Save Call Slip"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* STYLE */}
+      <style>{`
+        .input {
+          width: 100%;
+          padding: 12px;
+          border: 1px solid #d1d5db;
+          border-radius: 12px;
+          outline: none;
+        }
+
+        .input:focus {
+          border-color: #6366f1;
+          box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+        }
+        /* Table styles for improved appearance */
+        table {
+          border-collapse: collapse;
+        }
+        th, td {
+          border-right: 1px solid #ededed;
+        }
+        th:last-child, td:last-child {
+          border-right: none;
+        }
+        tbody tr:last-child td {
+          border-bottom: none;
+        }
+      `}</style>
     </div>
   );
 };

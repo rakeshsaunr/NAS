@@ -1,20 +1,20 @@
 import React, { useState, useRef } from 'react';
-import { 
-  ShieldCheck, 
-  Phone, 
-  Video, 
-  Network, 
-  Fingerprint, 
-  Building, 
-  Lock, 
-  Wifi, 
-  Flame, 
-  Home, 
-  Eye, 
-  Mail, 
-  MapPin, 
-  Clock, 
-  Send 
+import {
+  ShieldCheck,
+  Phone,
+  Video,
+  Network,
+  Fingerprint,
+  Building,
+  Lock,
+  Wifi,
+  Flame,
+  Home,
+  Eye,
+  Mail,
+  MapPin,
+  Clock,
+  Send
 } from 'lucide-react';
 
 const SERVICES = [
@@ -31,7 +31,7 @@ const SERVICES = [
   { id: 11, name: "Motion Sensors", icon: Eye, desc: "PIR and microwave sensors to detect movement and trigger alerts, lights, or alarms automatically." },
 ];
 
-const App = () => {
+const CctvServices = () => {
   const [activeIndex, setActiveIndex] = useState(-1);
   const detailRef = useRef(null);
 
@@ -49,7 +49,7 @@ const App = () => {
   const activeService = activeIndex >= 0 ? SERVICES[activeIndex] : null;
 
   return (
-    <div className="min-h-screen bg-white font-sans selection:bg-red-100 selection:text-red-900">
+    <div className="min-h-screen bg-gradient-to-tr from-gray-50 to-gray-200 font-sans selection:bg-red-100 selection:text-red-900">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
         body { font-family: 'Outfit', sans-serif; }
@@ -57,42 +57,53 @@ const App = () => {
         .fade-in { animation: fadeIn 0.5s ease forwards; }
       `}</style>
 
-      {/* Quick Impact Stats & Branding Header */}
-      <section className="bg-gray-50 py-16 px-6">
-        <div className="max-w-6xl mx-auto">
-          {/* Main Logo/Branding centered at the top */}
-          <div className="flex flex-col items-center gap-4 mb-12">
-            <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-200">
+      {/* Branding Header Redesign */}
+      <section className="bg-white pb-12 pt-14 px-4 shadow-md">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
+          <div className="flex flex-col items-center text-center md:w-2/5 gap-4">
+            <div className="w-16 h-16 mb-2 bg-red-600 rounded-3xl flex items-center justify-center shadow-lg">
               <ShieldCheck className="w-10 h-10 text-white" />
             </div>
-            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Secure Vision</h1>
-            <p className="text-gray-500 font-medium">Professional Security Solutions</p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { label: "Installations", val: "500+" },
-              { label: "Services", val: "11+" },
-              { label: "Support", val: "24/7" },
-              { label: "Years Exp.", val: "10+" }
-            ].map((stat, i) => (
-              <div key={i} className="text-center p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                <div className="text-3xl font-extrabold text-red-600 mb-1">{stat.val}</div>
-                <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">{stat.label}</div>
+            <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Secure Vision Solutions</h1>
+            <p className="text-gray-600 font-medium max-w-xs">Empowering your safety with advanced electronic security, automation, and connectivity services. Start protecting your premises today.</p>
+            <div className="flex gap-8 mt-6">
+              <div className="text-center">
+                <div className="text-xl font-extrabold text-red-600">500+</div>
+                <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">Installations</div>
               </div>
-            ))}
+              <div className="text-center">
+                <div className="text-xl font-extrabold text-red-600">11+</div>
+                <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">Services</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-extrabold text-red-600">24/7</div>
+                <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">Support</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-extrabold text-red-600">10+</div>
+                <div className="text-xs text-gray-400 font-bold uppercase tracking-widest">Years</div>
+              </div>
+            </div>
+          </div>
+          <div className="md:w-3/5 hidden md:block">
+            <img
+              src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=700&q=80"
+              alt="Security cameras on building"
+              className="rounded-3xl shadow-2xl w-full object-cover h-[320px]"
+            />
           </div>
         </div>
       </section>
 
-      {/* Main Services Section */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
+      {/* Modern Services Grid & Details */}
+      <section className="max-w-6xl mx-auto px-4 py-20">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-4 uppercase tracking-tight">Hamari Services</h2>
-          <div className="w-20 h-1.5 bg-red-600 mx-auto rounded-full"></div>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 uppercase tracking-tight">Our Services</h2>
+          <p className="text-gray-500 mb-2">Explore our wide range of smart security and automation offerings:</p>
+          <div className="w-24 h-1.5 bg-red-600 mx-auto rounded-full"></div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mb-14">
           {SERVICES.map((service, index) => {
             const Icon = service.icon;
             const isActive = index === activeIndex;
@@ -100,18 +111,19 @@ const App = () => {
               <button
                 key={service.id}
                 onClick={() => handleServiceClick(index)}
-                className={`flex flex-col items-center gap-4 p-6 rounded-3xl border transition-all duration-300 ${
-                  isActive 
-                    ? 'border-red-500 bg-red-50 shadow-xl scale-105' 
-                    : 'border-gray-100 bg-white hover:border-red-200 hover:shadow-md'
+                className={`flex flex-col items-center gap-4 p-6 rounded-2xl border-2 shadow-md transition-all duration-300 ${
+                  isActive
+                    ? 'border-red-500 bg-white scale-105 shadow-red-200'
+                    : 'border-gray-100 bg-gray-50 hover:border-red-300 hover:shadow-lg'
                 }`}
+                aria-pressed={isActive}
               >
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all ${
-                  isActive ? 'bg-red-600 text-white' : 'bg-red-50 text-red-600'
+                <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-all ${
+                  isActive ? 'bg-red-600 text-white' : 'bg-red-100 text-red-600'
                 }`}>
                   <Icon className="w-7 h-7" />
                 </div>
-                <span className={`text-sm font-bold ${isActive ? 'text-red-700' : 'text-gray-700'}`}>
+                <span className={`text-base font-bold ${isActive ? 'text-red-700' : 'text-gray-800'}`}>
                   {service.name}
                 </span>
               </button>
@@ -120,78 +132,24 @@ const App = () => {
         </div>
 
         {activeService && (
-          <div ref={detailRef} className="bg-gray-900 text-white rounded-3xl p-10 shadow-2xl fade-in flex flex-col md:flex-row items-center gap-8 border-l-8 border-red-600">
-            <div className="w-24 h-24 bg-white/10 rounded-3xl flex items-center justify-center flex-shrink-0">
-              <activeService.icon className="w-12 h-12 text-red-500" />
+          <div
+            ref={detailRef}
+            className="bg-white text-gray-900 rounded-3xl p-10 shadow-2xl fade-in flex flex-col md:flex-row items-center gap-8 border-l-8 border-red-600"
+          >
+            <div className="w-24 h-24 bg-red-50 rounded-2xl flex items-center justify-center flex-shrink-0">
+              <activeService.icon className="w-12 h-12 text-red-600" />
             </div>
             <div className="text-center md:text-left">
-              <h3 className="text-2xl font-bold mb-4">{activeService.name}</h3>
-              <p className="text-gray-300 text-lg leading-relaxed max-w-2xl">{activeService.desc}</p>
+              <h3 className="text-2xl font-bold mb-3">{activeService.name}</h3>
+              <p className="text-gray-700 text-lg leading-relaxed max-w-2xl">{activeService.desc}</p>
             </div>
           </div>
         )}
       </section>
 
-      {/* Inquiry Form & Info Block */}
-      <section className="bg-gray-50 py-20 px-6">
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-12">
-          
-          {/* Contact Details */}
-          <div className="lg:col-span-1 space-y-8">
-            <h2 className="text-3xl font-extrabold text-gray-900">Sampark Karein</h2>
-            <div className="space-y-6">
-              {[
-                { icon: Phone, title: "Phone", info: "+91 98765 43210" },
-                { icon: Mail, title: "Email", info: "contact@securevision.com" },
-                { icon: MapPin, title: "Address", info: "Main Road, New Delhi" },
-                { icon: Clock, title: "Hours", info: "Mon-Sat: 9AM-7PM" }
-              ].map((item, i) => (
-                <div key={i} className="flex gap-4">
-                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-red-600 shadow-sm">
-                    <item.icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{item.title}</p>
-                    <p className="text-gray-900 font-semibold">{item.info}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Integrated Form */}
-          <div className="lg:col-span-2 bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-gray-100">
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">Free Site Survey Ke Liye Form Bharein</h3>
-            <form className="grid md:grid-cols-2 gap-6" onSubmit={(e) => e.preventDefault()}>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Pura Naam</label>
-                <input type="text" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 focus:bg-white focus:border-red-500 outline-none transition-all" placeholder="John Doe" />
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Phone Number</label>
-                <input type="tel" className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 focus:bg-white focus:border-red-500 outline-none transition-all" placeholder="+91..." />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Konsi Service Chahiye?</label>
-                <select className="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 focus:bg-white focus:border-red-500 outline-none transition-all appearance-none">
-                  <option>CCTV Surveillance</option>
-                  <option>Home Automation</option>
-                  <option>Biometric System</option>
-                  <option>Others</option>
-                </select>
-              </div>
-              <div className="md:col-span-2">
-                <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-extrabold py-5 rounded-xl shadow-lg shadow-red-200 flex items-center justify-center gap-3 transition-all active:scale-95">
-                  <Send className="w-5 h-5" />
-                  SUBMIT ENQUIRY
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
+      {/* Contact & Inquiry Block removed as per instructions */}
     </div>
   );
 };
 
-export default App;
+export default CctvServices;

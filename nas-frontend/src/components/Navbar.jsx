@@ -146,6 +146,34 @@ const Navbar = () => {
   // Mobile product dropdown items: exactly the same as desktop
   const mobileProductDropdownItems = desktopProductDropdownItems;
 
+  // Join Hand Dropdown Items (for both desktop and mobile)
+  const joinHandDropdownItems = [
+    {
+      to: "/pages/career",
+      label: "Career With Us",
+    },
+    {
+      to: "/pages/internship",
+      label: "Internship Program",
+    },
+    {
+      to: "/pages/partner-with-us",
+      label: "Partner With Us",
+    },
+    {
+      to: "/pages/franchise-opportunity",
+      label: "Franchise Opportunity",
+    },
+    {
+      to: "/pages/dealer-registration",
+      label: "Dealer Registration",
+    },
+    {
+      to: "/pages/vendor-registration",
+      label: "Vendor Registration",
+    },
+  ];
+
   return (
     <>
       <nav className="bg-[#f2fbff] shadow-sm sticky top-0 z-50 animate-slide-down">
@@ -339,13 +367,15 @@ const Navbar = () => {
                       onMouseEnter={joinHandDropdown.handleDropdownMouseEnter}
                       onMouseLeave={joinHandDropdown.handleDropdownMouseLeave}
                     >
-                      <Link
-                        to="/pages/career"
-                        className="block px-3 py-1 text-sm hover:bg-gray-100"
-                      >
-                        Career With Us
-                      </Link>
-                      {/* Additional Join Hand links can be added here */}
+                      {joinHandDropdownItems.map((item) => (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          className="block px-3 py-1 text-sm hover:bg-gray-100"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -526,13 +556,16 @@ const Navbar = () => {
                 }`}
               >
                 <div className="overflow-hidden pl-4">
-                  <Link
-                    to="/pages/career"
-                    className="block px-2 py-1 text-sm hover:bg-gray-100 rounded"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Career With Us
-                  </Link>
+                  {joinHandDropdownItems.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className="block px-2 py-1 text-sm hover:bg-gray-100 rounded"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>

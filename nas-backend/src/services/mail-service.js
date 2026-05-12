@@ -1,50 +1,68 @@
+require('dotenv').config();
+const nodemailer = require('nodemailer');
 
-const transporter = require('../config/nodemailer')
+const SENDER_NAME = 'Rakesh Saunr';
+const FROM_EMAIL = process.env.FROM_EMAIL || `"${SENDER_NAME}" <${process.env.EMAIL_USER}>`;
+
+// Gmail SMTP transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
 const welcomeEmailTemplate = require('../emails/welcome-email');
-const emailVerificationTemplate = require('../emails/email-verification')
-const orderConfirmationTemplate = require('../emails/order-confirmation')
+const emailVerificationTemplate = require('../emails/email-verification');
+const orderConfirmationTemplate = require('../emails/order-confirmation');
 
-require('dotenv').config()
+async function sendEmail({ to, subject, html }) {
+  const mailOptions = {
+    from: FROM_EMAIL,
+    to,
+    subject,
+    html
+  };
 
-
-
-async function sendWelcomeMail(firstName,emailId) {
-    await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: emailId,
-        subject: "Welcome !",
-        html: welcomeEmailTemplate(firstName)
-    })
+  try {
+    let info = await transporter.sendMail(mailOptions);
+    if (info.accepted && info.accepted.length > 0) {
+      console.log(`✅ Email sent to ${to}`);
+    } else {
+      console.error('❌ Email send failed:', info.response || 'Unknown error');
+    }
+  } catch (err) {
+    console.error('❌ Error sending email:', err.message || err);
+  }
 }
 
-async function sendVerificationEmail(email,otp) {
-    try {
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: "Verification Email from Navdana",
-            html: emailVerificationTemplate(otp)
-        })
-    } catch (error) {
-        console.log("Error in Email Verification",error)
-    }
+async function sendWelcomeMail(firstName, emailId) {
+  await sendEmail({
+    to: emailId,
+    subject: 'Welcome!',
+    html: welcomeEmailTemplate(firstName),
+  });
+}
+
+async function sendVerificationEmail(email, otp) {
+  await sendEmail({
+    to: email,
+    subject: `Verification Email from ${SENDER_NAME}`,
+    html: emailVerificationTemplate(otp),
+  });
 }
 
 async function sendOrderConfirmationMail(email) {
-    try {
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Order Confirmation Mail',
-            html:orderConfirmationTemplate()
-        })
-    } catch (error) {
-        console.log("Error in the Order confirmation email")
-    }
+  await sendEmail({
+    to: email,
+    subject: `Order Confirmation - ${SENDER_NAME}`,
+    html: orderConfirmationTemplate(),
+  });
 }
 
 module.exports = {
-    sendWelcomeMail,
-    sendVerificationEmail,
-    sendOrderConfirmationMail
-}
+  sendWelcomeMail,
+  sendVerificationEmail,
+  sendOrderConfirmationMail,
+};

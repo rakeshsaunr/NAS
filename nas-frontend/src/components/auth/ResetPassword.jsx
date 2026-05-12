@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const API_BASE = "https://portfolio-backend-3nr9.onrender.com/api/v1/auth";
+const API_BASE = "http://localhost:5000/api/v1/auth";
 
 export default function ResetPassword() {
   const [form, setForm] = useState({ email: "", otp: "", newPassword: "" });

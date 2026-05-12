@@ -106,8 +106,7 @@ function AnimatedCloseSidebar({ onClick, show }) {
 const menuItems = [
   { to: "/dashboard", label: "Dashboard", icon: <RxDashboard className="inline-block text-lg text-red-600" /> },
   { to: "/dashboard/project", label: "Products", icon: <FaFolderOpen className="inline-block text-lg text-red-600" /> },
-  { to: "/dashboard/experiences", label: "Experiences", icon: <FaBriefcase className="inline-block text-lg text-red-600" /> },
-  { to: "/dashboard/service", label: "Services", icon: <FaConciergeBell className="inline-block text-lg text-red-600" /> },
+  { to: "/dashboard/service-call", label: "Services Call", icon: <FaBriefcase className="inline-block text-lg text-red-600" /> },
   { to: "/dashboard/customer", label: "Customer", icon: <FaUserAlt className="inline-block text-lg text-red-600" /> }, // Added Customer menu item
   // Sahi link yahan lagaya: should be "/dashboard/callslip" instead of "/dashboard/call-slip"
   { to: "/dashboard/callslip", label: "Call Generation Slip", icon: <RiStickyNote2Line className="inline-block text-lg text-red-600" /> },

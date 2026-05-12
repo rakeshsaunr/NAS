@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 process.on('uncaughtException', (err) => {
   console.error("Uncaught Exception:", err);
   process.exit(1);
@@ -9,13 +10,11 @@ process.on('unhandledRejection', (err) => {
   process.exit(1);
 });
 
-
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { DbConnection } = require('./config');
 const apiRoutes = require('./routes');
-const { ProductModel } = require('./models');
 const morganMiddleware = require('./utils/logger/morgan.logger');
 const errorHandler = require('./middlewares/error-handler');
 
@@ -23,7 +22,7 @@ const app = express();
 
 // CORS middleware
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173', 'https://www.rakeshsaunr.in','https://portfolio-frontend-a7e.pages.dev'],
   credentials: true,
 }));
 
@@ -34,27 +33,28 @@ app.use(cookieParser());
 // API routes
 app.use(morganMiddleware);
 app.use('/api', apiRoutes);
-app.use(errorHandler);
 
-// Test routes
-app.get('/', (req, res) => {
-  return res.status(200).json({ message: "Successful Connection" });
+// Custom validation error handler for Joi or other validation libraries
+app.use((err, req, res, next) => {
+  // Joi validation error
+  if (err && err.isJoi) {
+    const messages = err.details ? err.details.map(d => d.message) : [err.message];
+    return res.status(400).json({ errors: messages });
+  }
+  // Mongoose validation error
+  if (err && err.name === 'ValidationError') {
+    const messages = Object.values(err.errors).map(e => e.message);
+    return res.status(400).json({ errors: messages });
+  }
+  // Pass to default error handler
+  next(err);
 });
 
-app.get('/test', async (req, res) => {
-  try {
-    const category = await ProductModel.findById("68a9989cafa8da986fa36127");
-    return res.status(200).json({
-      success: true,
-      data: category
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error fetching category",
-      error: error.message
-    });
-  }
+app.use(errorHandler);
+
+// Test route
+app.get('/', (req, res) => {
+  return res.status(200).json({ message: "Successful Connection" });
 });
 
 // Start server

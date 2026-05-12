@@ -1,141 +1,136 @@
-import React from 'react';
-import { FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram } from "react-icons/fa";
+import React from "react";
+import {
+  FaFacebookF,
+  FaTwitter,
+  FaLinkedinIn,
+  FaInstagram,
+} from "react-icons/fa";
 
-const SocialIcon = ({ href, children, label, color }) => (
+// Redesigned Social Icon
+const SocialIcon = ({ href, label, color, children }) => (
   <a
     href={href}
     target="_blank"
     rel="noopener noreferrer"
     aria-label={label}
-    className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-500/20 transition-colors"
-    style={{ color: color }}
+    className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 hover:bg-red-100 hover:border-red-400 transition-all duration-300"
+    style={{ color }}
   >
     {children}
   </a>
 );
 
-const gradientTextClass =
-  "hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-[#d60000] hover:to-[#ff6464] focus:text-transparent focus:bg-clip-text focus:bg-gradient-to-r focus:from-[#d60000] focus:to-[#ff6464]";
-// applies red gradient to text color on hover & focus
+const footerNav = [
+  {
+    title: "Company",
+    links: [
+      { text: "About NAS", href: "/pages/about" },
+      { text: "Our Projects", href: "/pages/projects" },
+      { text: "Careers", href: "/pages/careers" },
+      { text: "Why Choose Us", href: "/pages/why-us" },
+    ],
+  },
+  {
+    title: "Security Solutions",
+    links: [
+      { text: "CCTV Solutions", href: "/pages/cctv" },
+      { text: "Video Door Phones", href: "/pages/video-door-phone" },
+      { text: "Biometric Systems", href: "/pages/biometric" },
+      { text: "Alarm Systems", href: "/pages/alarm-system" },
+    ],
+  },
+  {
+    title: "IT & Networking",
+    links: [
+      { text: "WiFi Networking", href: "/pages/wifi-networking" },
+      { text: "EPABX Solutions", href: "/pages/epabx" },
+      { text: "Server Installation", href: "/pages/server-installation" },
+      { text: "AMC Support", href: "/pages/amc-support" },
+    ],
+  },
+  {
+    title: "Support & Legal",
+    links: [
+      { text: "Contact Us", href: "/pages/contact" },
+      { text: "Customer Support", href: "/pages/support" },
+      { text: "Privacy Policy", href: "/privacy-policy" },
+      { text: "Terms & Conditions", href: "/terms-and-conditions" },
+    ],
+  },
+];
+
+const socialLinks = [
+  {
+    href: "https://www.facebook.com/",
+    label: "Facebook",
+    color: "#1877F2",
+    icon: <FaFacebookF size={16} />,
+  },
+  {
+    href: "https://www.twitter.com/",
+    label: "Twitter",
+    color: "#1DA1F2",
+    icon: <FaTwitter size={16} />,
+  },
+  {
+    href: "https://www.linkedin.com/",
+    label: "LinkedIn",
+    color: "#0A66C2",
+    icon: <FaLinkedinIn size={16} />,
+  },
+  {
+    href: "https://www.instagram.com/",
+    label: "Instagram",
+    color: "#E4405F",
+    icon: <FaInstagram size={16} />,
+  },
+];
+
+// Hide hover gradient, use subtle red instead on hover
+const linkClass =
+  "text-gray-600 text-sm font-medium transition-colors duration-300 hover:text-red-600";
 
 const Footer = () => {
-  const footerLinks = [
-    {
-      title: "Connect & Discover",
-      links: [
-        "Contact us",
-        "Privacy policy",
-        "Advertise with us",
-        "Tradeshows",
-        "Blogs",
-        "News & events"
-      ]
-    },
-    {
-      title: "About Us",
-      links: [
-        "About Network Automation Solutions",
-        "Success stories",
-        "FAQ",
-        "Career with us"
-      ]
-    },
-    {
-      title: "For buyers",
-      links: [
-        "Exporters directory",
-        "All categories",
-        "Sellers",
-        "Feedback",
-        "Regions"
-      ]
-    },
-    {
-      title: "For sellers",
-      links: [
-        "Buyers",
-        "GTP Trade Assurance",
-        "Customer Testimonials",
-        "Terms & conditions",
-        "Complaint"
-      ]
-    }
-  ];
-
-  const categories = [
-    "Agriculture",
-    "Apparel And Fashion Accessories",
-    "Construction & Real Estate",
-    "Electronic & Electrical",
-    "Food & Beverages",
-    "Home Furnishing",
-    "Minerals & Metals"
-  ];
-
-  const socialLinks = [
-    {
-      href: "https://www.facebook.com/",
-      label: "Facebook",
-      color: "#3b5998",
-      icon: <FaFacebookF size={20} />
-    },
-    {
-      href: "https://www.twitter.com/",
-      label: "Twitter",
-      color: "#1da1f2",
-      icon: <FaTwitter size={20} />
-    },
-    {
-      href: "https://www.linkedin.com/",
-      label: "LinkedIn",
-      color: "#0077b5",
-      icon: <FaLinkedinIn size={20} />
-    },
-    {
-      href: "https://www.instagram.com/",
-      label: "Instagram",
-      color: "#e4405f",
-      icon: <FaInstagram size={20} />
-    }
-  ];
-
   return (
-    <footer className="bg-white text-black font-sans selection:bg-red-500 selection:text-black">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-
-        {/* Top Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
-
-          {/* Brand Column */}
-          <div className="lg:col-span-5">
-
-            <h3 className="text-2xl font-bold mb-4">
+    <footer className="bg-neutral-50 text-black border-t border-gray-200">
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        {/* Top info & navigation */}
+        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-10 border-b border-gray-200 pb-10">
+          <div className="md:w-1/3 flex-shrink-0 mb-8 md:mb-0">
+            <h2 className="text-2xl sm:text-3xl font-extrabold mb-2 text-black tracking-tight">
               Network Automation Solutions
-            </h3>
-            <p className="text-[10px] text-gray-700">
-                30+ Years Experience in CCTV & IT Solutions
-            </p>
-            <p className="text-sm leading-relaxed text-gray-700 pr-4">
-            Network Automation Solutions is a leading Home Automation & Security System company in Indore providing CCTV, Video Door Phone, EPABX, WiFi Networking, Smart Lighting & Security Solutions with Sales, Installation & AMC support since 2001.
-            </p>
+            </h2>
+            <div className="text-red-600 font-semibold text-xs sm:text-sm mb-3">
+              30+ Years Experience in CCTV & IT Solutions
+            </div>
+            <div className="text-gray-700 text-xs sm:text-sm mb-6 pr-2 max-w-md">
+              Network Automation Solutions is a leading Home Automation & Security System company in Indore providing CCTV, Video Door Phone, EPABX, WiFi Networking, Smart Lighting & Security Solutions with Sales, Installation & AMC support since 2001.
+            </div>
+            <div className="flex items-center space-x-2">
+              {socialLinks.map((social) => (
+                <SocialIcon
+                  key={social.label}
+                  href={social.href}
+                  label={social.label}
+                  color={social.color}
+                >
+                  {social.icon}
+                </SocialIcon>
+              ))}
+            </div>
           </div>
-
-          {/* Links Columns */}
-          <div className="lg:col-span-7 grid grid-cols-2 md:grid-cols-4 gap-6">
-            {footerLinks.map((section, idx) => (
+          {/* Nav links 4 columns */}
+          <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-6">
+            {footerNav.map((section, idx) => (
               <div key={idx}>
-                <h4 className="font-bold text-sm mb-4">
+                <h4 className="font-bold text-xs sm:text-sm uppercase tracking-widest mb-3 text-black">
                   {section.title}
                 </h4>
-
                 <ul className="space-y-2">
-                  {section.links.map((linkText, lIdx) => (
-                    <li key={lIdx}>
-                      <a
-                        href="#"
-                        className={`text-xs text-gray-600 transition-colors ${gradientTextClass}`}
-                      >
-                        {linkText}
+                  {section.links.map((link, i) => (
+                    <li key={i}>
+                      <a href={link.href} className={linkClass}>
+                        {link.text}
                       </a>
                     </li>
                   ))}
@@ -146,62 +141,27 @@ const Footer = () => {
         </div>
 
         {/* Newsletter */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-
-          <div className="w-full md:w-1/3">
-            <h4 className="text-yellow-400 font-bold text-xl mb-3">
-              Subscribe for newsletter
-            </h4>
-
-            <div className="relative flex items-center">
-
+        <div className="mt-10 flex flex-col md:flex-row md:justify-between md:items-center gap-8 border-b border-gray-200 pb-8">
+          <div>
+            <div className="text-xl font-bold mb-1 text-black">
+              Subscribe Newsletter
+            </div>
+            <div className="text-gray-600 text-xs sm:text-sm">
+              Get latest updates about CCTV, Networking & Smart Security Solutions.
+            </div>
+          </div>
+          <form className="w-full max-w-md">
+            <div className="flex overflow-hidden rounded-full border border-gray-300 bg-white">
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full py-2 px-4 rounded-sm text-black outline-none bg-gray-100"
+                className="flex-1 px-4 py-2 sm:py-3 border-none text-xs sm:text-sm outline-none bg-transparent"
               />
-
-              <button className="absolute right-0 bg-black border-l border-gray-200 px-4 py-2 flex items-center gap-1 text-yellow-300 font-bold hover:bg-gray-800 transition-colors">
-                {/* Icon removed */}
-                <span className="text-sm">Send</span>
+              <button className="bg-red-600 text-white px-6 text-xs sm:text-sm font-semibold transition-all duration-300 hover:bg-red-700">
+                Subscribe
               </button>
-
             </div>
-          </div>
-
-          {/* Social Icons */}
-          <div className="flex gap-2 mt-6 md:mt-0">
-            {socialLinks.map((social) => (
-              <SocialIcon
-                href={social.href}
-                key={social.label}
-                label={social.label}
-                color={social.color}
-              >
-                {social.icon}
-              </SocialIcon>
-            ))}
-          </div>
-        </div>
-
-        {/* Countries section removed */}
-
-        {/* Categories */}
-        <div className="border-t border-gray-300 pt-6 flex flex-wrap gap-x-4 gap-y-2 text-[11px] font-semibold text-gray-700">
-
-          {categories.map((cat, idx) => (
-            <React.Fragment key={idx}>
-              <a
-                href="#"
-                className={`whitespace-nowrap transition-colors ${gradientTextClass}`}
-              >
-                {cat}
-              </a>
-              {idx !== categories.length - 1 && (
-                <span className="text-gray-400">|</span>
-              )}
-            </React.Fragment>
-          ))}
+          </form>
         </div>
       </div>
     </footer>

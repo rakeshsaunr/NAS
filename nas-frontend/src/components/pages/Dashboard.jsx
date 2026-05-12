@@ -24,8 +24,8 @@ import {
 /* ---------------------------
   ✅ Configure your API URLs
 --------------------------- */
-const API_PROJECTS = "https://portfolio-backend-3nr9.onrender.com/api/v1/project";
-const API_BLOGS = "https://portfolio-backend-3nr9.onrender.com/api/v1/blog";
+const API_PROJECTS = "http://localhost:5000/api/v1/project";
+const API_BLOGS = "http://localhost:5000/api/v1/callslip";
 
 /* ---------------------------
   UI Card configuration
@@ -76,11 +76,12 @@ function exportCSV(data = [], filename = "export.csv") {
 }
 
 const Dashboard = () => {
-  const [counts, setCounts] = useState({ projects: null, blogs: null });
+  // according data fetch karo
   const [projectsList, setProjectsList] = useState([]);
   const [blogsList, setBlogsList] = useState([]);
   const [recentProjects, setRecentProjects] = useState([]);
   const [recentBlogs, setRecentBlogs] = useState([]);
+  const [counts, setCounts] = useState({ projects: null, blogs: null });
   const [loading, setLoading] = useState(true);
   const [fetching, setFetching] = useState(false);
   const [error, setError] = useState("");
@@ -92,46 +93,42 @@ const Dashboard = () => {
     }
   });
 
-  // search queries
   const [projQuery, setProjQuery] = useState("");
   const [blogQuery, setBlogQuery] = useState("");
 
-  // modal state
   const [openModal, setOpenModal] = useState(false);
   const [modalItem, setModalItem] = useState(null);
-  const [modalType, setModalType] = useState("project"); // or 'blog'
+  const [modalType, setModalType] = useState("project");
 
   useEffect(() => {
-    // apply initial theme on mount
     const el = document.documentElement;
     if (dark) el.classList.add("dark");
     else el.classList.remove("dark");
-  }, []); // only on mount
+  }, []); // apply theme once
 
+  // Fetch projects then blogs, that means according (sequential)
   const fetchAll = async (showToast = false) => {
     setLoading(true);
     setError("");
     try {
-      const [projectsRes, blogsRes] = await Promise.all([
-        axios.get(API_PROJECTS),
-        axios.get(API_BLOGS),
-      ]);
-
-      const projectsArray =
+      // Pehle projects ka data fetch karo
+      const projectsRes = await axios.get(API_PROJECTS);
+      let projectsArray =
         Array.isArray(projectsRes.data?.data)
           ? projectsRes.data.data
           : Array.isArray(projectsRes.data)
           ? projectsRes.data
           : projectsRes.data?.projects || [];
+      setProjectsList(projectsArray);
 
-      const blogsArray =
+      // Blogs ka data fetch karo
+      const blogsRes = await axios.get(API_BLOGS);
+      let blogsArray =
         Array.isArray(blogsRes.data?.data)
           ? blogsRes.data.data
           : Array.isArray(blogsRes.data)
           ? blogsRes.data
           : blogsRes.data?.blogs || [];
-
-      setProjectsList(projectsArray);
       setBlogsList(blogsArray);
 
       setCounts({

@@ -1,24 +1,37 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaRegEdit } from "react-icons/fa"; // Edit icon (from Experiences.jsx)
-import { RiDeleteBin5Line } from "react-icons/ri"; // Delete icon (from Experiences.jsx)
+import { FaRegEdit } from "react-icons/fa";
+import { RiDeleteBin5Line } from "react-icons/ri";
 
-const API_BASE = "https://portfolio-backend-3nr9.onrender.com/api/v1/project";
+const API_BASE = "http://localhost:5000/api/v1/project";
+
+const CATEGORY_OPTIONS = [
+  { label: "CCTV Surveillance Systems", value: "CCTV Surveillance Systems" },
+  { label: "Biometrics Attendance Systems", value: "Biometrics Attendance Systems" },
+  { label: "Networking Solutions", value: "Networking Solutions" },
+  { label: "EPABX Systems", value: "EPABX Systems" },
+  { label: "Security Solutions", value: "Security Solutions" },
+  { label: "Home Automation", value: "Home Automation" },
+  { label: "Video Door Phones", value: "Video Door Phones" },
+  { label: "Access Control Systems", value: "Access Control Systems" },
+  { label: "Smart Locks", value: "Smart Locks" },
+  { label: "Fire Alarm Systems", value: "Fire Alarm Systems" },
+  { label: "WiFi Solutions", value: "WiFi Solutions" },
+  { label: "Intercom Systems", value: "Intercom Systems" },
+];
 
 const Project = () => {
   const [projects, setProjects] = useState([]);
   const [form, setForm] = useState({
     title: "",
     description: "",
-    link: "",
-    image: null,
+    category: "",
   });
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
-  const fileInputRef = useRef(null);
 
   // Fetch projects
   const fetchProjects = async () => {
@@ -39,12 +52,8 @@ const Project = () => {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value, type, files } = e.target;
-    if (name === "image" && type === "file") {
-      setForm((prev) => ({ ...prev, image: files[0] || null }));
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
-    }
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
     setFormError("");
   };
 
@@ -54,15 +63,15 @@ const Project = () => {
     // validation
     if (!form.title.trim()) return setFormError("Title is required");
     if (!form.description.trim()) return setFormError("Description is required");
-    if (!form.link.trim()) return setFormError("Link is required");
-    if (!editId && !form.image) return setFormError("Image is required");
+    if (!form.category.trim()) return setFormError("Category is required");
 
     setFormError("");
-    const formData = new FormData();
-    formData.append("title", form.title);
-    formData.append("description", form.description);
-    formData.append("link", form.link);
-    if (form.image) formData.append("image", form.image);
+
+    const body = {
+      title: form.title,
+      description: form.description,
+      category: form.category,
+    };
 
     try {
       setSubmitting(true);
@@ -81,7 +90,7 @@ const Project = () => {
 
       if (editId) {
         // UPDATE case
-        const res = await axios.put(`${API_BASE}/${editId}`, formData, config);
+        const res = await axios.put(`${API_BASE}/${editId}`, body, config);
 
         const updatedProject = res.data?.data || null;
         if (updatedProject) {
@@ -91,7 +100,7 @@ const Project = () => {
         }
       } else {
         // CREATE case
-        const res = await axios.post(API_BASE, formData, config);
+        const res = await axios.post(API_BASE, body, config);
         const newProject = res.data?.data || null;
         if (newProject) {
           setProjects((prev) => [newProject, ...prev]);
@@ -101,8 +110,7 @@ const Project = () => {
       }
 
       // reset form
-      setForm({ title: "", description: "", link: "", image: null });
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      setForm({ title: "", description: "", category: "" });
       setShowForm(false);
       setEditId(null);
     } catch (err) {
@@ -145,10 +153,8 @@ const Project = () => {
     setForm({
       title: project.title || "",
       description: project.description || "",
-      link: project.link || "",
-      image: null,
+      category: project.category || "",
     });
-    if (fileInputRef.current) fileInputRef.current.value = "";
     setEditId(project._id);
     setShowForm(true);
     setFormError("");
@@ -157,8 +163,7 @@ const Project = () => {
   const handleCancel = () => {
     setShowForm(false);
     setEditId(null);
-    setForm({ title: "", description: "", link: "", image: null });
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    setForm({ title: "", description: "", category: "" });
     setFormError("");
   };
 
@@ -172,8 +177,7 @@ const Project = () => {
             onClick={() => {
               setShowForm(true);
               setEditId(null);
-              setForm({ title: "", description: "", link: "", image: null });
-              if (fileInputRef.current) fileInputRef.current.value = "";
+              setForm({ title: "", description: "", category: "" });
               setFormError("");
             }}
           >
@@ -219,29 +223,17 @@ const Project = () => {
                   />
                 </div>
                 <div>
-                  <input
-                    type="text"
-                    name="link"
-                    placeholder="Link"
-                    value={form.link}
+                  <select
+                    name="category"
+                    value={form.category}
                     onChange={handleChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                  />
-                </div>
-                <div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    name="image"
-                    accept="image/*"
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-pink-50 file:text-pink-700"
-                  />
-                  {editId && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      {`Leave blank to keep existing image.`}
-                    </div>
-                  )}
+                    className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white"
+                  >
+                    <option value="">Select Category</option>
+                    {CATEGORY_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
                 </div>
                 {formError && <div className="text-red-600 text-sm">{formError}</div>}
                 <div className="flex justify-end gap-2">
@@ -302,26 +294,12 @@ const Project = () => {
                       </button>
                     </div>
                     <div className="flex flex-col md:flex-row w-full gap-4">
-                      {project.image && (
-                        <div className="flex-shrink-0 w-full md:w-48 flex items-center justify-center">
-                          <img
-                            src={project.image}
-                            alt={project.title}
-                            className="rounded-md object-cover w-full h-auto"
-                          />
-                        </div>
-                      )}
                       <div className="flex-1">
                         <h3 className="text-xl font-semibold text-gray-800 mb-1">{project.title}</h3>
                         <p className="text-gray-600 mb-2">{project.description}</p>
-                        <a
-                          href={project.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block text-pink-600 hover:underline font-medium"
-                        >
-                          Visit
-                        </a>
+                        {project.category && (
+                          <div className="text-pink-700 text-sm font-medium mb-1">Category: {project.category}</div>
+                        )}
                       </div>
                     </div>
                   </div>

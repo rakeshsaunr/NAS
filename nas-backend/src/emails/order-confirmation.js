@@ -1,48 +1,54 @@
 function orderConfirmationTemplate() {
   return `
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Order Confirmation - Navdana</title>
-  </head>
-  <body style="margin:0; padding:0; background-color: #FCF4E7; font-family: Arial, sans-serif;">
-    
-    <div style="display: flex; justify-content: center; padding: 20px;">
-      <div style="background-color: #FFFFFF; max-width: 600px; width: 100%; border-radius: 8px; overflow: hidden; text-align: center; padding: 40px 20px;">
-        
-        <!-- Logo -->
-        <div style="margin-bottom: 30px;">
-          <img src="https://res.cloudinary.com/dcmkct12y/image/upload/v1758273108/navdanapng_f7u6kv.png" alt="Navdana Logo" style="max-width: 150px;">
-        </div>
-        
-        <!-- Thanks message -->
-        <h1 style="color: #232321; margin-bottom: 20px;">Thanks for your purchase!</h1>
-        
-        <!-- Shipping text -->
-        <p style="color: #232321; font-size: 16px; line-height: 1.5; margin-bottom: 30px;">
-          We’re getting your order ready to be shipped. We will notify you when it has been sent.
-        </p>
-        
-        <!-- View Order button -->
-        <a href="https://www.navdana.com" 
-           style="background-color: #A44D1D; color: #FFFFFF; padding: 12px 25px; border-radius: 5px; text-decoration: none; font-weight: bold;">
-          View Order
-        </a>
+<!DOCTYPE html>
+<html lang="en" class="m-0 p-0">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width"/>
+  <title>Order Confirmation - Rakesh Saunr</title>
+  <style>
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; }
+  </style>
+</head>
+<body class="m-0 p-0 bg-[#FCF4E7] font-sans text-[#232321]">
   
-        <!-- Footer -->
-        <div style="margin-top: 40px; font-size: 14px; color: #555555;">
-          <p>© ${new Date().getFullYear()} Navdana. All rights reserved.</p>
-        </div>
-  
+  <div class="flex justify-center p-6">
+    <div class="bg-white max-w-[600px] w-full rounded-lg overflow-hidden text-center p-10">
+
+      <!-- Logo -->
+      <div class="mb-8">
+        <img src="https://res.cloudinary.com/dalxsdm7s/image/upload/v1759926403/My%20Brand/logos_htjjat.png" 
+             alt="Rakesh Saunr Logo" 
+             class="mx-auto max-w-[150px]">
       </div>
+
+      <!-- Thanks message -->
+      <h1 class="text-2xl font-bold mb-6 bg-gradient-to-r from-[#00B25C] to-[#0076D6] text-transparent bg-clip-text">
+        Thanks for your purchase!
+      </h1>
+
+      <!-- Shipping text -->
+      <p class="text-base mb-8">
+        We’re getting your order ready to be shipped. We will notify you when it has been sent.
+      </p>
+
+      <!-- View Order button -->
+      <a href="https://www.rakeshsaunr.in/" 
+         class="inline-block bg-gradient-to-r from-[#00B25C] to-[#0076D6] text-white font-bold py-3 px-6 rounded-md mb-8">
+        View Order
+      </a>
+
+      <!-- Footer -->
+      <div class="text-sm text-[#555]">
+        <p>© ${new Date().getFullYear()} Rakesh Saunr. All rights reserved.</p>
+      </div>
+
     </div>
-    
-  </body>
-  </html>
+  </div>
+
+</body>
+</html>
   `;
 }
 
-
-module.exports = orderConfirmationTemplate
+module.exports = orderConfirmationTemplate;
