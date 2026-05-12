@@ -4,7 +4,9 @@ module.exports = {
     CrudRepository: require('./crud-repository'),
     BlogRepository: require('./blog-repository'),
     ContactRepository: require('./contact-repository'),
-    ProjectRepository: require('./project-repository'),
+    ProjectRepository: require('./project-repository'), // Correct casing
     CallslipRepository: require('./callslip-repository'),
     ServiceCallRepository: require('./servicecall-repository'),
+    DepartmentRepository: require('./department-repository'),
+    CustomerRepository: require('./customer-repository'),
 };

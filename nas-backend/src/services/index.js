@@ -7,4 +7,6 @@ module.exports = {
     UploadService: require('./upload-service'),
     ProjectService: require('./project-service'),
     ServiceCallService: require('./servicecall-service'),
+    DepartmentService: require('./department-service'),
+    CustomerService: require('./customer-service'),
 };

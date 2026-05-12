@@ -1,35 +1,199 @@
-const ServiceCall = require('../models/servicecall-model');
+const ServiceCall = require(
+  "../models/servicecall-model"
+);
 
-async function createServiceCall(data) {
-  return await ServiceCall.create(data);
-}
+// ===========================================
+// CREATE SERVICE CALL
+// ===========================================
 
-async function getAllServiceCalls() {
-  return await ServiceCall.find().sort({ createdAt: -1 });
-}
+const create = async (data) => {
+  try {
+    // ================= VALIDATION =================
 
-async function getServiceCall(id) {
-  const call = await ServiceCall.findById(id);
-  if (!call) throw new Error('ServiceCall not found');
-  return call;
-}
+    if (!data.customerName) {
+      throw new Error(
+        "Customer Name is Required"
+      );
+    }
 
-async function updateServiceCall(id, data) {
-  const updated = await ServiceCall.findByIdAndUpdate(id, data, { new: true });
-  if (!updated) throw new Error('ServiceCall not found or update failed');
-  return updated;
-}
+    if (!data.companyName) {
+      throw new Error(
+        "Company Name is Required"
+      );
+    }
 
-async function deleteServiceCall(id) {
-  const deleted = await ServiceCall.findByIdAndDelete(id);
-  if (!deleted) throw new Error('ServiceCall not found or already deleted');
-  return deleted;
-}
+    // ================= AUTO CALL SHEET NUMBER =================
+
+    const randomNumber = Math.floor(
+      1000 + Math.random() * 9000
+    );
+
+    data.callSheetNumber = `SC-${randomNumber}`;
+
+    // ================= CREATE =================
+
+    const serviceCall =
+      await ServiceCall.create(data);
+
+    return serviceCall;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+// ===========================================
+// GET ALL SERVICE CALLS
+// ===========================================
+
+const getAll = async () => {
+  try {
+    const serviceCalls =
+      await ServiceCall.find({
+        isActive: true,
+      })
+        .populate(
+          "department",
+          "name"
+        )
+        .populate(
+          "category",
+          "name"
+        )
+        .populate(
+          "productType",
+          "name"
+        )
+        .sort({
+          createdAt: -1,
+        });
+
+    return serviceCalls;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+// ===========================================
+// GET SINGLE SERVICE CALL
+// ===========================================
+
+const getById = async (id) => {
+  try {
+    if (!id) {
+      throw new Error("ID is Required");
+    }
+
+    const serviceCall =
+      await ServiceCall.findById(id)
+        .populate(
+          "department",
+          "name"
+        )
+        .populate(
+          "category",
+          "name"
+        )
+        .populate(
+          "productType",
+          "name"
+        );
+
+    if (!serviceCall) {
+      throw new Error(
+        "Service Call Not Found"
+      );
+    }
+
+    return serviceCall;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+// ===========================================
+// UPDATE SERVICE CALL
+// ===========================================
+
+const update = async (
+  id,
+  data
+) => {
+  try {
+    if (!id) {
+      throw new Error("ID is Required");
+    }
+
+    const updatedServiceCall =
+      await ServiceCall.findByIdAndUpdate(
+        id,
+        data,
+        {
+          new: true,
+          runValidators: true,
+        }
+      )
+        .populate(
+          "department",
+          "name"
+        )
+        .populate(
+          "category",
+          "name"
+        )
+        .populate(
+          "productType",
+          "name"
+        );
+
+    if (!updatedServiceCall) {
+      throw new Error(
+        "Service Call Not Found"
+      );
+    }
+
+    return updatedServiceCall;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+// ===========================================
+// SOFT DELETE SERVICE CALL
+// ===========================================
+
+const remove = async (id) => {
+  try {
+    if (!id) {
+      throw new Error("ID is Required");
+    }
+
+    const deletedServiceCall =
+      await ServiceCall.findByIdAndUpdate(
+        id,
+        {
+          isActive: false,
+        },
+        {
+          new: true,
+        }
+      );
+
+    if (!deletedServiceCall) {
+      throw new Error(
+        "Service Call Not Found"
+      );
+    }
+
+    return deletedServiceCall;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
 
 module.exports = {
-  createServiceCall,
-  getAllServiceCalls,
-  getServiceCall,
-  updateServiceCall,
-  deleteServiceCall,
+  create,
+  getAll,
+  getById,
+  update,
+  remove,
 };

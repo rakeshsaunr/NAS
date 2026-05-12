@@ -1,51 +1,139 @@
-const ServiceModel = require('../models/servicecall-model');
-
-class ServiceRepository {
-    // Create a new individual call attend / call sheet
-    async createCallSheet(data) {
-        try {
-            const callSheet = await ServiceModel.create(data);
-            return callSheet;
-        } catch (error) {
-            throw new Error('Error creating call sheet: ' + error.message);
-        }
+const ServiceModel = require(
+    "../models/servicecall-model"
+  );
+  
+  class ServiceRepository {
+    // ===========================================
+    // CREATE CALL SHEET
+    // ===========================================
+  
+    async create(data) {
+      try {
+        const callSheet =
+          await ServiceModel.create(data);
+  
+        return callSheet;
+      } catch (error) {
+        throw new Error(error.message);
+      }
     }
-
-    // Get all call sheets
-    async getAllCallSheets() {
-        try {
-            return await ServiceModel.find({});
-        } catch (error) {
-            throw new Error('Error fetching call sheets: ' + error.message);
-        }
+  
+    // ===========================================
+    // GET ALL CALL SHEETS
+    // ===========================================
+  
+    async getAll() {
+      try {
+        const callSheets =
+          await ServiceModel.find({
+            isActive: true,
+          })
+            .populate(
+              "department",
+              "name"
+            )
+            .populate(
+              "category",
+              "name"
+            )
+            .populate(
+              "productType",
+              "name"
+            )
+            .sort({
+              createdAt: -1,
+            });
+  
+        return callSheets;
+      } catch (error) {
+        throw new Error(error.message);
+      }
     }
-
-    // Get a single call sheet by ID
-    async getCallSheetById(id) {
-        try {
-            return await ServiceModel.findById(id);
-        } catch (error) {
-            throw new Error('Error fetching call sheet: ' + error.message);
-        }
+  
+    // ===========================================
+    // GET SINGLE CALL SHEET
+    // ===========================================
+  
+    async getById(id) {
+      try {
+        const callSheet =
+          await ServiceModel.findById(id)
+            .populate(
+              "department",
+              "name"
+            )
+            .populate(
+              "category",
+              "name"
+            )
+            .populate(
+              "productType",
+              "name"
+            );
+  
+        return callSheet;
+      } catch (error) {
+        throw new Error(error.message);
+      }
     }
-
-    // Update a call sheet by ID
-    async updateCallSheet(id, data) {
-        try {
-            return await ServiceModel.findByIdAndUpdate(id, data, { new: true });
-        } catch (error) {
-            throw new Error('Error updating call sheet: ' + error.message);
-        }
+  
+    // ===========================================
+    // UPDATE CALL SHEET
+    // ===========================================
+  
+    async update(id, data) {
+      try {
+        const updatedCallSheet =
+          await ServiceModel.findByIdAndUpdate(
+            id,
+            data,
+            {
+              new: true,
+              runValidators: true,
+            }
+          )
+            .populate(
+              "department",
+              "name"
+            )
+            .populate(
+              "category",
+              "name"
+            )
+            .populate(
+              "productType",
+              "name"
+            );
+  
+        return updatedCallSheet;
+      } catch (error) {
+        throw new Error(error.message);
+      }
     }
-
-    // Delete a call sheet by ID
-    async deleteCallSheet(id) {
-        try {
-            return await ServiceModel.findByIdAndDelete(id);
-        } catch (error) {
-            throw new Error('Error deleting call sheet: ' + error.message);
-        }
+  
+    // ===========================================
+    // SOFT DELETE CALL SHEET
+    // ===========================================
+  
+    async remove(id) {
+      try {
+        const deletedCallSheet =
+          await ServiceModel.findByIdAndUpdate(
+            id,
+            {
+              isActive: false,
+            },
+            {
+              new: true,
+            }
+          );
+  
+        return deletedCallSheet;
+      } catch (error) {
+        throw new Error(error.message);
+      }
     }
-}
-
-module.exports = new ServiceRepository();
+  }
+  
+  module.exports =
+    new ServiceRepository();

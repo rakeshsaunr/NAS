@@ -5,11 +5,12 @@ import {
   FaFolderOpen,
   FaRegNewspaper,
   FaBriefcase,
-  FaConciergeBell,
   FaUserAlt, // Customer icon
 } from "react-icons/fa";
 import { HiOutlineMenuAlt1 } from "react-icons/hi";
 import { RiStickyNote2Line } from "react-icons/ri";
+import { MdCategory } from "react-icons/md";
+import { MdApartment } from "react-icons/md";
 
 /**
  * Hamburger icon (HiOutlineMenuAlt1) with gradient color like close icon, but now in red
@@ -102,13 +103,15 @@ function AnimatedCloseSidebar({ onClick, show }) {
   );
 }
 
-// Dynamic menu items
+// Add a Customer menu item using FaUserAlt icon
 const menuItems = [
   { to: "/dashboard", label: "Dashboard", icon: <RxDashboard className="inline-block text-lg text-red-600" /> },
   { to: "/dashboard/project", label: "Products", icon: <FaFolderOpen className="inline-block text-lg text-red-600" /> },
+  { to: "/dashboard/category", label: "Category", icon: <MdCategory className="inline-block text-lg text-red-600" /> },
+  { to: "/dashboard/department", label: "Department", icon: <MdApartment className="inline-block text-lg text-red-600" /> },
+  { to: "/dashboard/customer", label: "Customer", icon: <FaUserAlt className="inline-block text-lg text-red-600" /> }, // Customer menu item added
   { to: "/dashboard/service-call", label: "Services Call", icon: <FaBriefcase className="inline-block text-lg text-red-600" /> },
-  { to: "/dashboard/customer", label: "Customer", icon: <FaUserAlt className="inline-block text-lg text-red-600" /> }, // Added Customer menu item
-  // Sahi link yahan lagaya: should be "/dashboard/callslip" instead of "/dashboard/call-slip"
+  // Removed Users menu item
   { to: "/dashboard/callslip", label: "Call Generation Slip", icon: <RiStickyNote2Line className="inline-block text-lg text-red-600" /> },
   { to: "/dashboard/blogs", label: "Blog", icon: <FaRegNewspaper className="inline-block text-lg text-red-600" /> },
 ];

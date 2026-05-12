@@ -1,25 +1,48 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const projectSchema = new mongoose.Schema({
-    title: {
-        type: String,
-        required: true,
-        unique: true,
+const productSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
     },
+
     description: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
+      trim: true,
     },
-    public_id: {
-        type: String
-    },
-    category: {
-        type: String,
-    },
-    or: {
-        type: String,
-    }
-});
 
-// Prevent OverwriteModelError: check if model already exists
-module.exports = mongoose.models.Project || mongoose.model('Project', projectSchema);
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
+
+    price: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    stock: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const Product = mongoose.model("Product", productSchema);
+
+module.exports = Product;

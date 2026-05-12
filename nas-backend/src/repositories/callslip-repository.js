@@ -1,31 +1,98 @@
 const CallSlip = require("../models/callslip-model");
 
-const createCallSlip = async (data) => {
-  return await CallSlip.create(data);
+// ================= CREATE CALL SLIP =================
+
+const create = async (data) => {
+  try {
+    const callSlip = await CallSlip.create(data);
+
+    return callSlip;
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
-const getAllCallSlips = async () => {
-  return await CallSlip.find().sort({ createdAt: -1 });
+// ================= GET ALL CALL SLIPS =================
+
+const getAll = async () => {
+  try {
+    const callSlips = await CallSlip.find({
+      isActive: true,
+    })
+      .populate("department", "name")
+      .populate("category", "name")
+      .populate("productType", "name")
+      .sort({ createdAt: -1 });
+
+    return callSlips;
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
-const getCallSlipById = async (id) => {
-  return await CallSlip.findById(id);
+// ================= GET SINGLE CALL SLIP =================
+
+const getById = async (id) => {
+  try {
+    const callSlip = await CallSlip.findById(id)
+      .populate("department", "name")
+      .populate("category", "name")
+      .populate("productType", "name");
+
+    return callSlip;
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
-const updateCallSlip = async (id, data) => {
-  return await CallSlip.findByIdAndUpdate(id, data, {
-    new: true,
-  });
+// ================= UPDATE CALL SLIP =================
+
+const update = async (id, data) => {
+  try {
+    const updatedCallSlip =
+      await CallSlip.findByIdAndUpdate(
+        id,
+        data,
+        {
+          new: true,
+          runValidators: true,
+        }
+      )
+        .populate("department", "name")
+        .populate("category", "name")
+        .populate("productType", "name");
+
+    return updatedCallSlip;
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
-const deleteCallSlip = async (id) => {
-  return await CallSlip.findByIdAndDelete(id);
+// ================= SOFT DELETE CALL SLIP =================
+
+const remove = async (id) => {
+  try {
+    const deletedCallSlip =
+      await CallSlip.findByIdAndUpdate(
+        id,
+        {
+          isActive: false,
+        },
+        {
+          new: true,
+        }
+      );
+
+    return deletedCallSlip;
+  } catch (error) {
+    throw new Error(error.message);
+  }
 };
 
 module.exports = {
-  createCallSlip,
-  getAllCallSlips,
-  getCallSlipById,
-  updateCallSlip,
-  deleteCallSlip,
+  create,
+  getAll,
+  getById,
+  update,
+  remove,
 };

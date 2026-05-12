@@ -1,600 +1,783 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
 import axios from "axios";
-import { FaRegEdit } from "react-icons/fa";
-import { RiDeleteBin5Line } from "react-icons/ri";
 
-const API_BASE = "http://localhost:5000/api/v1/servicecall";
+const API =
+  "http://localhost:5000/api/v1/servicecall";
 
-const STATUS_OPTIONS = [
-  "Pending",
-  "In Progress",
-  "Completed",
-  "Closed",
-  "Hold",
-];
+const ServiceCall = () => {
+  // ===========================================
+  // STATES
+  // ===========================================
 
-const initialForm = {
-  callSheetNumber: "",
-  date: "",
-  callStartTime: "",
-  callEndTime: "",
-  companyName: "",
-  customerName: "",
-  wiringDetails: "",
-  productDetails: "",
-  serviceDescription: "",
-  workStatus: "Pending",
-  customerRemark: "",
-  technicianRemarks: "",
-
-  workType: {
-    newInstallation: false,
-    serviceCall: false,
-    maintenance: false,
-  },
-};
-
-const Service = () => {
   const [serviceCalls, setServiceCalls] = useState([]);
-  const [form, setForm] = useState(initialForm);
-  const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [editId, setEditId] = useState(null);
 
-  // ================= FETCH =================
+  const [departments, setDepartments] = useState([]);
+
+  const [categories, setCategories] = useState([]); // All categories
+
+  const [categoryOptions, setCategoryOptions] = useState([]); // Shown in Category select
+  const [productTypes, setProductTypes] = useState([]); // Shown in Product Type select
+
+  const [form, setForm] = useState({
+    customerName: "",
+    companyName: "",
+    contactNumber: "",
+    email: "",
+    address: "",
+
+    department: "",
+    category: "",
+    productType: "",
+
+    callDate: "",
+    callStartTime: "",
+    callEndTime: "",
+    totalWorkingHour: "",
+
+    workType: "",
+
+    wiringDetails: "",
+    productDetails: "",
+    serviceDescription: "",
+    problemDescription: "",
+    errorDetails: "",
+
+    priorityLevel: "Low",
+
+    workStatus: "Pending",
+
+    charges: {
+      serviceCharges: "",
+      totalAmount: "",
+      paymentMode: "",
+      paymentStatus: "Pending",
+    },
+
+    assignedEngineer: "",
+    technicianName: "",
+
+    customerRemark: "",
+    technicianRemarks: "",
+    internalRemarks: "",
+
+    loggedBy: "",
+  });
+
+  // ===========================================
+  // FETCH SERVICE CALLS
+  // ===========================================
+
   const fetchServiceCalls = async () => {
     try {
-      setLoading(true);
-
-      const res = await axios.get(API_BASE);
-
-      setServiceCalls(res.data?.data || []);
+      const res = await axios.get(API);
+      setServiceCalls(res.data.data);
     } catch (error) {
       console.log(error);
-      alert("Failed to fetch service calls");
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  // ===========================================
+  // FETCH DEPARTMENTS
+  // ===========================================
+
+  const fetchDepartments = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/v1/department");
+      setDepartments(res.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ===========================================
+  // FETCH CATEGORIES
+  // ===========================================
+
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/v1/category");
+      setCategories(res.data.data);
+      setCategoryOptions(res.data.data); // By default show all categories
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ===========================================
+  // FETCH PRODUCT TYPES BY CATEGORY
+  // ===========================================
+
+  const fetchProductTypesByCategory = async (categoryId) => {
+    // For demo, assuming each category has a "products" array.
+    // If your API gives /category/:id/product, fetch from there.
+    try {
+      if (!categoryId) {
+        setProductTypes([]);
+        return;
+      }
+      const category = categories.find((cat) => cat._id === categoryId);
+      if (category && Array.isArray(category.products)) {
+        setProductTypes(category.products);
+      } else {
+        // Otherwise, fetch from API if available
+        const res = await axios.get(
+          `http://localhost:5000/api/v1/category/${categoryId}/product`
+        );
+        setProductTypes(res.data.data || []);
+      }
+    } catch (error) {
+      setProductTypes([]);
     }
   };
 
   useEffect(() => {
     fetchServiceCalls();
+    fetchDepartments();
+    fetchCategories();
   }, []);
 
-  // ================= HANDLE CHANGE =================
+  // ===========================================
+  // HANDLE CHANGE
+  // ===========================================
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    // Charges handling
+    if (name.startsWith("charges.")) {
+      const key = name.split(".")[1];
+
+      setForm((prev) => ({
+        ...prev,
+        charges: {
+          ...prev.charges,
+          [key]: value,
+        },
+      }));
+    }
+    // Dependency: Department > Category, Category > Product Type
+    else if (name === "department") {
+      setForm((prev) => ({
+        ...prev,
+        department: value,
+        category: "",
+        productType: "",
+      }));
+
+      // Filter categories by department
+      if (value) {
+        setCategoryOptions(
+          categories.filter((cat) => cat.department === value)
+        );
+      } else {
+        setCategoryOptions(categories);
+      }
+      setProductTypes([]); // Reset
+    }
+    else if (name === "category") {
+      setForm((prev) => ({
+        ...prev,
+        category: value,
+        productType: "",
+      }));
+
+      if (value) {
+        fetchProductTypesByCategory(value);
+      } else {
+        setProductTypes([]);
+      }
+    }
+    else if (name === "productType") {
+      setForm((prev) => ({
+        ...prev,
+        productType: value,
+      }));
+    }
+    else {
+      setForm((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
-  // ================= HANDLE CHECKBOX =================
-  const handleCheckbox = (e) => {
-    const { name, checked } = e.target;
+  // ===========================================
+  // SUBMIT
+  // ===========================================
 
-    setForm((prev) => ({
-      ...prev,
-      workType: {
-        ...prev.workType,
-        [name]: checked,
-      },
-    }));
-  };
-
-  // ================= VALIDATION =================
-  const validateForm = () => {
-    if (!form.callSheetNumber)
-      return "Call Sheet Number is required";
-
-    if (!form.date)
-      return "Date is required";
-
-    if (!form.callStartTime)
-      return "Call Start Time is required";
-
-    if (!form.callEndTime)
-      return "Call End Time is required";
-
-    if (!form.companyName)
-      return "Company Name is required";
-
-    if (!form.customerName)
-      return "Customer Name is required";
-
-    return null;
-  };
-
-  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const error = validateForm();
-
-    if (error) {
-      alert(error);
-      return;
-    }
-
     try {
-      setSubmitting(true);
+      await axios.post(API, form);
 
-      const body = {
-        ...form,
-      };
+      alert("Service Call Created Successfully");
 
-      if (editId) {
-        const res = await axios.put(
-          `${API_BASE}/${editId}`,
-          body
-        );
+      fetchServiceCalls();
 
-        const updated = res.data.data;
+      // RESET FORM
 
-        setServiceCalls((prev) =>
-          prev.map((item) =>
-            item._id === editId ? updated : item
-          )
-        );
+      setForm({
+        customerName: "",
+        companyName: "",
+        contactNumber: "",
+        email: "",
+        address: "",
 
-        alert("Service Call Updated");
-      } else {
-        const res = await axios.post(API_BASE, body);
+        department: "",
+        category: "",
+        productType: "",
 
-        setServiceCalls((prev) => [
-          res.data.data,
-          ...prev,
-        ]);
+        callDate: "",
+        callStartTime: "",
+        callEndTime: "",
+        totalWorkingHour: "",
 
-        alert("Service Call Added");
-      }
+        workType: "",
 
-      setForm(initialForm);
-      setEditId(null);
-      setShowForm(false);
+        wiringDetails: "",
+        productDetails: "",
+        serviceDescription: "",
+        problemDescription: "",
+        errorDetails: "",
 
+        priorityLevel: "Low",
+
+        workStatus: "Pending",
+
+        charges: {
+          serviceCharges: "",
+          totalAmount: "",
+          paymentMode: "",
+          paymentStatus: "Pending",
+        },
+
+        assignedEngineer: "",
+        technicianName: "",
+
+        customerRemark: "",
+        technicianRemarks: "",
+        internalRemarks: "",
+
+        loggedBy: "",
+      });
+
+      setCategoryOptions(categories);
+      setProductTypes([]);
     } catch (error) {
       console.log(error);
 
-      alert(
-        error.response?.data?.message ||
-          "Something went wrong"
-      );
-    } finally {
-      setSubmitting(false);
+      alert(error.response?.data?.message || "Error");
     }
-  };
-
-  // ================= DELETE =================
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Delete this service call?"
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      await axios.delete(`${API_BASE}/${id}`);
-
-      setServiceCalls((prev) =>
-        prev.filter((item) => item._id !== id)
-      );
-
-      alert("Deleted Successfully");
-    } catch (error) {
-      console.log(error);
-      alert("Delete failed");
-    }
-  };
-
-  // ================= EDIT =================
-  const handleEdit = (call) => {
-    setForm({
-      callSheetNumber: call.callSheetNumber || "",
-      date: call.date
-        ? call.date.split("T")[0]
-        : "",
-      callStartTime: call.callStartTime || "",
-      callEndTime: call.callEndTime || "",
-      companyName: call.companyName || "",
-      customerName: call.customerName || "",
-      wiringDetails: call.wiringDetails || "",
-      productDetails: call.productDetails || "",
-      serviceDescription:
-        call.serviceDescription || "",
-      workStatus: call.workStatus || "Pending",
-      customerRemark: call.customerRemark || "",
-      technicianRemarks:
-        call.technicianRemarks || "",
-
-      workType: {
-        newInstallation:
-          call.workType?.newInstallation || false,
-        serviceCall:
-          call.workType?.serviceCall || false,
-        maintenance:
-          call.workType?.maintenance || false,
-      },
-    });
-
-    setEditId(call._id);
-    setShowForm(true);
-  };
-
-  // ================= CANCEL =================
-  const handleCancel = () => {
-    setForm(initialForm);
-    setEditId(null);
-    setShowForm(false);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-5">
-      <div className="max-w-7xl mx-auto">
+    <div className="p-6 bg-gray-100 min-h-screen">
+      {/* HEADER */}
 
-        {/* HEADER */}
-        <div className="flex items-center justify-between mb-5">
-          <h1 className="text-3xl font-bold">
-            Service Calls
-          </h1>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">
+          Service Call Management
+        </h1>
+
+        <p className="text-gray-500">
+          Manage all service
+          calls
+        </p>
+      </div>
+
+      {/* FORM */}
+
+      <div className="bg-white rounded-2xl shadow p-6">
+        <form
+          onSubmit={handleSubmit}
+          className="grid md:grid-cols-2 gap-4"
+        >
+          {/* CUSTOMER */}
+
+          <input
+            type="text"
+            name="customerName"
+            placeholder="Customer Name"
+            className="input"
+            value={form.customerName}
+            onChange={handleChange}
+            required
+          />
+
+          <input
+            type="text"
+            name="companyName"
+            placeholder="Company Name"
+            className="input"
+            value={form.companyName}
+            onChange={handleChange}
+          />
+
+          <input
+            type="text"
+            name="contactNumber"
+            placeholder="Contact Number"
+            className="input"
+            value={form.contactNumber}
+            onChange={handleChange}
+          />
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            className="input"
+            value={form.email}
+            onChange={handleChange}
+          />
+
+          <input
+            type="text"
+            name="address"
+            placeholder="Address"
+            className="input md:col-span-2"
+            value={form.address}
+            onChange={handleChange}
+          />
+
+          {/* DEPARTMENT */}
+          <select
+            name="department"
+            className="input"
+            value={form.department}
+            onChange={handleChange}
+          >
+            <option value="">
+              Select Department
+            </option>
+            {departments.map((item) => (
+              <option
+                key={item._id}
+                value={item._id}
+              >
+                {item.name}
+              </option>
+            ))}
+          </select>
+
+          {/* CATEGORY */}
+          <select
+            name="category"
+            className="input"
+            value={form.category}
+            onChange={handleChange}
+            disabled={!form.department}
+          >
+            <option value="">
+              Select Category
+            </option>
+            {categoryOptions.map((item) => (
+              <option
+                key={item._id}
+                value={item._id}
+              >
+                {item.name}
+              </option>
+            ))}
+          </select>
+
+          {/* PRODUCT TYPE */}
+          <select
+            name="productType"
+            className="input"
+            value={form.productType}
+            onChange={handleChange}
+            disabled={!form.category}
+          >
+            <option value="">
+              Select Product Type
+            </option>
+            {productTypes && productTypes.length > 0 ? (
+              productTypes.map((item, idx) =>
+                // item may be { _id, name } or just string
+                typeof item === "object" ? (
+                  <option key={item._id || idx} value={item._id || item.name}>
+                    {item.name}
+                  </option>
+                ) : (
+                  <option key={idx} value={item}>
+                    {item}
+                  </option>
+                )
+              )
+            ) : null}
+          </select>
+
+          {/* DATE */}
+
+          <input
+            type="date"
+            name="callDate"
+            className="input"
+            value={form.callDate}
+            onChange={handleChange}
+          />
+
+          {/* START TIME */}
+
+          <input
+            type="time"
+            name="callStartTime"
+            className="input"
+            value={form.callStartTime}
+            onChange={handleChange}
+          />
+
+          {/* END TIME */}
+
+          <input
+            type="time"
+            name="callEndTime"
+            className="input"
+            value={form.callEndTime}
+            onChange={handleChange}
+          />
+
+          {/* WORKING HOURS */}
+
+          <input
+            type="text"
+            name="totalWorkingHour"
+            placeholder="Total Working Hour"
+            className="input"
+            value={form.totalWorkingHour}
+            onChange={handleChange}
+          />
+
+          {/* WORK TYPE */}
+
+          <select
+            name="workType"
+            className="input"
+            value={form.workType}
+            onChange={handleChange}
+          >
+            <option value="">
+              Select Work Type
+            </option>
+            <option value="New Installation">
+              New Installation
+            </option>
+            <option value="Service Call">
+              Service Call
+            </option>
+            <option value="Maintenance">
+              Maintenance
+            </option>
+            <option value="AMC Visit">
+              AMC Visit
+            </option>
+            <option value="Inspection">
+              Inspection
+            </option>
+          </select>
+
+          {/* PRIORITY */}
+
+          <select
+            name="priorityLevel"
+            className="input"
+            value={form.priorityLevel}
+            onChange={handleChange}
+          >
+            <option value="Low">
+              Low
+            </option>
+            <option value="Medium">
+              Medium
+            </option>
+            <option value="High">
+              High
+            </option>
+            <option value="Urgent">
+              Urgent
+            </option>
+          </select>
+
+          {/* STATUS */}
+
+          <select
+            name="workStatus"
+            className="input"
+            value={form.workStatus}
+            onChange={handleChange}
+          >
+            <option value="Pending">
+              Pending
+            </option>
+            <option value="In Progress">
+              In Progress
+            </option>
+            <option value="Completed">
+              Completed
+            </option>
+            <option value="Closed">
+              Closed
+            </option>
+            <option value="Hold">
+              Hold
+            </option>
+            <option value="Cancelled">
+              Cancelled
+            </option>
+          </select>
+
+          {/* DETAILS */}
+
+          <textarea
+            name="wiringDetails"
+            placeholder="Wiring Details"
+            className="input md:col-span-2"
+            value={form.wiringDetails}
+            onChange={handleChange}
+          />
+
+          <textarea
+            name="productDetails"
+            placeholder="Product Details"
+            className="input md:col-span-2"
+            value={form.productDetails}
+            onChange={handleChange}
+          />
+
+          <textarea
+            name="serviceDescription"
+            placeholder="Service Description"
+            className="input md:col-span-2"
+            value={form.serviceDescription}
+            onChange={handleChange}
+          />
+
+          <textarea
+            name="problemDescription"
+            placeholder="Problem Description"
+            className="input md:col-span-2"
+            value={form.problemDescription}
+            onChange={handleChange}
+          />
+
+          {/* CHARGES */}
+
+          <input
+            type="number"
+            name="charges.serviceCharges"
+            placeholder="Service Charges"
+            className="input"
+            value={form.charges.serviceCharges}
+            onChange={handleChange}
+          />
+
+          <input
+            type="number"
+            name="charges.totalAmount"
+            placeholder="Total Amount"
+            className="input"
+            value={form.charges.totalAmount}
+            onChange={handleChange}
+          />
+
+          {/* PAYMENT MODE */}
+
+          <select
+            name="charges.paymentMode"
+            className="input"
+            value={form.charges.paymentMode}
+            onChange={handleChange}
+          >
+            <option value="">
+              Select Payment Mode
+            </option>
+            <option value="Cash">
+              Cash
+            </option>
+            <option value="UPI">
+              UPI
+            </option>
+            <option value="Card">
+              Card
+            </option>
+            <option value="Bank Transfer">
+              Bank Transfer
+            </option>
+            <option value="Cheque">
+              Cheque
+            </option>
+          </select>
+
+          {/* PAYMENT STATUS */}
+
+          <select
+            name="charges.paymentStatus"
+            className="input"
+            value={form.charges.paymentStatus}
+            onChange={handleChange}
+          >
+            <option value="Pending">
+              Pending
+            </option>
+            <option value="Paid">
+              Paid
+            </option>
+          </select>
+
+          {/* ENGINEER */}
+
+          <input
+            type="text"
+            name="assignedEngineer"
+            placeholder="Assigned Engineer"
+            className="input"
+            value={form.assignedEngineer}
+            onChange={handleChange}
+          />
+
+          <input
+            type="text"
+            name="technicianName"
+            placeholder="Technician Name"
+            className="input"
+            value={form.technicianName}
+            onChange={handleChange}
+          />
+
+          {/* REMARKS */}
+
+          <textarea
+            name="customerRemark"
+            placeholder="Customer Remark"
+            className="input md:col-span-2"
+            value={form.customerRemark}
+            onChange={handleChange}
+          />
+
+          <textarea
+            name="technicianRemarks"
+            placeholder="Technician Remarks"
+            className="input md:col-span-2"
+            value={form.technicianRemarks}
+            onChange={handleChange}
+          />
+
+          <textarea
+            name="internalRemarks"
+            placeholder="Internal Remarks"
+            className="input md:col-span-2"
+            value={form.internalRemarks}
+            onChange={handleChange}
+          />
+
+          {/* LOGGED BY */}
+
+          <input
+            type="text"
+            name="loggedBy"
+            placeholder="Logged By"
+            className="input"
+            value={form.loggedBy}
+            onChange={handleChange}
+          />
+
+          {/* BUTTON */}
 
           <button
-            onClick={() => {
-              setShowForm(true);
-              setEditId(null);
-              setForm(initialForm);
-            }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            type="submit"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl md:col-span-2"
           >
-            Add Service Call
+            Save Service Call
           </button>
-        </div>
-
-        {/* MODAL */}
-        {showForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-auto">
-            <div className="bg-white w-full max-w-3xl rounded-lg p-6 relative">
-
-              <button
-                onClick={handleCancel}
-                className="absolute top-3 right-3 text-2xl"
-              >
-                ×
-              </button>
-
-              <h2 className="text-2xl font-bold mb-5">
-                {editId
-                  ? "Update Service Call"
-                  : "Add Service Call"}
-              </h2>
-
-              <form
-                onSubmit={handleSubmit}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              >
-
-                <input
-                  type="text"
-                  name="callSheetNumber"
-                  placeholder="Call Sheet Number"
-                  value={form.callSheetNumber}
-                  onChange={handleChange}
-                  className="border p-2 rounded"
-                />
-
-                <input
-                  type="date"
-                  name="date"
-                  value={form.date}
-                  onChange={handleChange}
-                  className="border p-2 rounded"
-                />
-
-                <input
-                  type="text"
-                  name="callStartTime"
-                  placeholder="Call Start Time"
-                  value={form.callStartTime}
-                  onChange={handleChange}
-                  className="border p-2 rounded"
-                />
-
-                <input
-                  type="text"
-                  name="callEndTime"
-                  placeholder="Call End Time"
-                  value={form.callEndTime}
-                  onChange={handleChange}
-                  className="border p-2 rounded"
-                />
-
-                <input
-                  type="text"
-                  name="companyName"
-                  placeholder="Company Name"
-                  value={form.companyName}
-                  onChange={handleChange}
-                  className="border p-2 rounded"
-                />
-
-                <input
-                  type="text"
-                  name="customerName"
-                  placeholder="Customer Name"
-                  value={form.customerName}
-                  onChange={handleChange}
-                  className="border p-2 rounded"
-                />
-
-                {/* CHECKBOX */}
-                <div className="col-span-2">
-                  <label className="font-semibold block mb-2">
-                    Work Type
-                  </label>
-
-                  <div className="flex gap-5 flex-wrap">
-
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        name="newInstallation"
-                        checked={
-                          form.workType.newInstallation
-                        }
-                        onChange={handleCheckbox}
-                      />
-                      New Installation
-                    </label>
-
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        name="serviceCall"
-                        checked={
-                          form.workType.serviceCall
-                        }
-                        onChange={handleCheckbox}
-                      />
-                      Service Call
-                    </label>
-
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        name="maintenance"
-                        checked={
-                          form.workType.maintenance
-                        }
-                        onChange={handleCheckbox}
-                      />
-                      Maintenance
-                    </label>
-
-                  </div>
-                </div>
-
-                <textarea
-                  name="wiringDetails"
-                  placeholder="Wiring Details"
-                  value={form.wiringDetails}
-                  onChange={handleChange}
-                  className="border p-2 rounded md:col-span-2"
-                />
-
-                <textarea
-                  name="productDetails"
-                  placeholder="Product Details"
-                  value={form.productDetails}
-                  onChange={handleChange}
-                  className="border p-2 rounded md:col-span-2"
-                />
-
-                <textarea
-                  name="serviceDescription"
-                  placeholder="Service Description"
-                  value={form.serviceDescription}
-                  onChange={handleChange}
-                  className="border p-2 rounded md:col-span-2"
-                />
-
-                <select
-                  name="workStatus"
-                  value={form.workStatus}
-                  onChange={handleChange}
-                  className="border p-2 rounded"
-                >
-                  {STATUS_OPTIONS.map((status) => (
-                    <option
-                      key={status}
-                      value={status}
-                    >
-                      {status}
-                    </option>
-                  ))}
-                </select>
-
-                <textarea
-                  name="customerRemark"
-                  placeholder="Customer Remark"
-                  value={form.customerRemark}
-                  onChange={handleChange}
-                  className="border p-2 rounded"
-                />
-
-                <textarea
-                  name="technicianRemarks"
-                  placeholder="Technician Remarks"
-                  value={form.technicianRemarks}
-                  onChange={handleChange}
-                  className="border p-2 rounded"
-                />
-
-                <div className="col-span-2 flex justify-end gap-3 mt-4">
-
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
-                  >
-                    Cancel
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-                  >
-                    {submitting
-                      ? "Saving..."
-                      : editId
-                      ? "Update"
-                      : "Save"}
-                  </button>
-
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* LIST */}
-        {loading ? (
-          <div className="text-center py-10">
-            Loading...
-          </div>
-        ) : serviceCalls.length === 0 ? (
-          <div className="text-center py-10">
-            No Service Calls Found
-          </div>
-        ) : (
-          <div className="grid gap-5">
-            {serviceCalls.map((call) => (
-              <div
-                key={call._id}
-                className="bg-white rounded-lg shadow p-5 relative"
-              >
-
-                {/* ACTIONS */}
-                <div className="absolute top-3 right-3 flex gap-2">
-
-                  <button
-                    onClick={() => handleEdit(call)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full"
-                  >
-                    <FaRegEdit />
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      handleDelete(call._id)
-                    }
-                    className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full"
-                  >
-                    <RiDeleteBin5Line />
-                  </button>
-
-                </div>
-
-                <h2 className="text-2xl font-bold mb-2">
-                  {call.customerName}
-                </h2>
-
-                <div className="grid md:grid-cols-2 gap-2 text-gray-700">
-
-                  <p>
-                    <b>Call Sheet:</b>{" "}
-                    {call.callSheetNumber}
-                  </p>
-
-                  <p>
-                    <b>Date:</b>{" "}
-                    {new Date(
-                      call.date
-                    ).toLocaleDateString()}
-                  </p>
-
-                  <p>
-                    <b>Company:</b>{" "}
-                    {call.companyName}
-                  </p>
-
-                  <p>
-                    <b>Status:</b>{" "}
-                    {call.workStatus}
-                  </p>
-
-                  <p>
-                    <b>Start:</b>{" "}
-                    {call.callStartTime}
-                  </p>
-
-                  <p>
-                    <b>End:</b>{" "}
-                    {call.callEndTime}
-                  </p>
-
-                </div>
-
-                <div className="mt-3">
-
-                  <p>
-                    <b>Work Type:</b>
-                  </p>
-
-                  <div className="flex gap-3 mt-1 flex-wrap">
-
-                    {call.workType?.newInstallation && (
-                      <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-sm">
-                        New Installation
-                      </span>
-                    )}
-
-                    {call.workType?.serviceCall && (
-                      <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-sm">
-                        Service Call
-                      </span>
-                    )}
-
-                    {call.workType?.maintenance && (
-                      <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-sm">
-                        Maintenance
-                      </span>
-                    )}
-
-                  </div>
-                </div>
-
-                {call.serviceDescription && (
-                  <div className="mt-3">
-                    <b>Description:</b>
-                    <p>{call.serviceDescription}</p>
-                  </div>
-                )}
-
-                {call.customerRemark && (
-                  <div className="mt-3">
-                    <b>Customer Remark:</b>
-                    <p>{call.customerRemark}</p>
-                  </div>
-                )}
-
-                {call.technicianRemarks && (
-                  <div className="mt-3">
-                    <b>Technician Remark:</b>
-                    <p>{call.technicianRemarks}</p>
-                  </div>
-                )}
-
-              </div>
-            ))}
-          </div>
-        )}
+        </form>
       </div>
+
+      {/* TABLE */}
+
+      <div className="bg-white rounded-2xl shadow mt-6 overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-left">
+                Call No
+              </th>
+
+              <th className="p-3 text-left">
+                Customer
+              </th>
+
+              <th className="p-3 text-left">
+                Company
+              </th>
+
+              <th className="p-3 text-left">
+                Work Type
+              </th>
+
+              <th className="p-3 text-left">
+                Priority
+              </th>
+
+              <th className="p-3 text-left">
+                Status
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {serviceCalls.map((item) => (
+              <tr
+                key={item._id}
+                className="border-b"
+              >
+                <td className="p-3">
+                  {item.callSheetNumber}
+                </td>
+                <td className="p-3">
+                  {item.customerName}
+                </td>
+                <td className="p-3">
+                  {item.companyName}
+                </td>
+                <td className="p-3">
+                  {item.workType}
+                </td>
+                <td className="p-3">
+                  {item.priorityLevel}
+                </td>
+                <td className="p-3">
+                  {item.workStatus}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* STYLE */}
+
+      <style>{`
+        .input {
+          width: 100%;
+          border: 1px solid #d1d5db;
+          padding: 12px;
+          border-radius: 12px;
+          outline: none;
+        }
+
+        .input:focus {
+          border-color: #4f46e5;
+          box-shadow: 0 0 0 3px rgba(79,70,229,0.2);
+        }
+      `}</style>
     </div>
   );
 };
 
-export default Service;
+export default ServiceCall;

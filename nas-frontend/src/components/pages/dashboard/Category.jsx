@@ -3,18 +3,15 @@ import axios from "axios";
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin5Line } from "react-icons/ri";
 
-const API_BASE = "http://localhost:5000/api/v1/project";
-const CATEGORY_API_BASE = "http://localhost:5000/api/v1/category";
+const API_BASE = "http://localhost:5000/api/v1/category";
 
-const Product = () => {
-  const [products, setProducts] = useState([]);
+const Category = () => {
+
   const [categories, setCategories] = useState([]);
+
   const [form, setForm] = useState({
-    name: "",
+    categoryName: "",
     description: "",
-    category: "",
-    price: "",
-    stock: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -23,38 +20,38 @@ const Product = () => {
   const [editId, setEditId] = useState(null);
   const [formError, setFormError] = useState("");
 
-  // ================= FETCH PRODUCTS =================
-  const fetchProducts = async () => {
+
+  // ================= FETCH CATEGORIES =================
+  const fetchCategories = async () => {
+
     setLoading(true);
+
     try {
+
       const res = await axios.get(API_BASE);
-      setProducts(res.data?.data || []);
+
+      setCategories(res.data?.data || []);
+
     } catch (error) {
+
       console.error(error);
-      alert("Failed to fetch products");
+
+      alert("Failed to fetch categories");
+
     } finally {
+
       setLoading(false);
     }
   };
 
-  // ================= FETCH CATEGORIES =================
-  const fetchCategories = async () => {
-    try {
-      const res = await axios.get(CATEGORY_API_BASE);
-      setCategories(res.data?.data || []);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to fetch categories");
-    }
-  };
-
   useEffect(() => {
-    fetchProducts();
     fetchCategories();
   }, []);
 
+
   // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
+
     const { name, value } = e.target;
 
     setForm((prev) => ({
@@ -65,152 +62,163 @@ const Product = () => {
     setFormError("");
   };
 
+
   // ================= HANDLE SUBMIT =================
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
-    if (!form.name.trim()) {
-      return setFormError("Product name is required");
-    }
-
-    if (!form.description.trim()) {
-      return setFormError("Description is required");
-    }
-
-    if (!form.category.trim()) {
-      return setFormError("Category is required");
-    }
-
-    if (!form.price) {
-      return setFormError("Price is required");
-    }
-
-    if (!form.stock) {
-      return setFormError("Stock is required");
+    if (!form.categoryName.trim()) {
+      return setFormError(
+        "Category name is required"
+      );
     }
 
     const body = {
-      name: form.name,
+      categoryName: form.categoryName,
       description: form.description,
-      category: form.category,
-      price: Number(form.price),
-      stock: Number(form.stock),
     };
 
     try {
+
       setSubmitting(true);
 
       if (editId) {
+
         // UPDATE
         const res = await axios.put(
           `${API_BASE}/${editId}`,
           body
         );
 
-        const updatedProduct = res.data?.data;
+        const updatedCategory =
+          res.data?.data;
 
-        setProducts((prev) =>
+        setCategories((prev) =>
           prev.map((item) =>
             item._id === editId
-              ? updatedProduct
+              ? updatedCategory
               : item
           )
         );
+
       } else {
+
         // CREATE
         const res = await axios.post(
           API_BASE,
           body
         );
 
-        const newProduct = res.data?.data;
+        const newCategory =
+          res.data?.data;
 
-        setProducts((prev) => [
-          newProduct,
+        setCategories((prev) => [
+          newCategory,
           ...prev,
         ]);
       }
 
       // RESET
       setForm({
-        name: "",
+        categoryName: "",
         description: "",
-        category: "",
-        price: "",
-        stock: "",
       });
 
       setEditId(null);
+
       setShowForm(false);
 
     } catch (error) {
+
       console.error(error);
+
       alert(
         error.response?.data?.message ||
-        "Failed to save product"
+        "Failed to save category"
       );
+
     } finally {
+
       setSubmitting(false);
     }
   };
 
+
   // ================= HANDLE DELETE =================
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this product?")) {
+
+    if (
+      !window.confirm(
+        "Delete this category?"
+      )
+    ) {
       return;
     }
 
     try {
-      await axios.delete(`${API_BASE}/${id}`);
 
-      setProducts((prev) =>
-        prev.filter((item) => item._id !== id)
+      await axios.delete(
+        `${API_BASE}/${id}`
       );
+
+      setCategories((prev) =>
+        prev.filter(
+          (item) => item._id !== id
+        )
+      );
+
     } catch (error) {
+
       console.error(error);
-      alert("Failed to delete product");
+
+      alert("Failed to delete category");
     }
   };
 
+
   // ================= HANDLE EDIT =================
-  const handleEdit = (product) => {
+  const handleEdit = (category) => {
+
     setForm({
-      name: product.name || "",
-      description: product.description || "",
-      category: product.category || "",
-      price: product.price || "",
-      stock: product.stock || "",
+      categoryName:
+        category.categoryName || "",
+      description:
+        category.description || "",
     });
 
-    setEditId(product._id);
+    setEditId(category._id);
 
     setShowForm(true);
   };
 
+
   // ================= HANDLE CANCEL =================
   const handleCancel = () => {
+
     setShowForm(false);
 
     setEditId(null);
 
     setForm({
-      name: "",
+      categoryName: "",
       description: "",
-      category: "",
-      price: "",
-      stock: "",
     });
 
     setFormError("");
   };
 
+
   return (
     <div className="w-full min-h-screen bg-gray-50 p-6">
+
       <div className="max-w-6xl mx-auto">
+
         {/* HEADER */}
         <div className="flex items-center justify-between mb-6">
+
           <h1 className="text-3xl font-bold text-gray-800">
-            Products
+            Categories
           </h1>
 
           <button
@@ -220,14 +228,18 @@ const Product = () => {
             }}
             className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg"
           >
-            Add Product
+            Add Category
           </button>
         </div>
 
+
         {/* MODAL */}
         {showForm && (
+
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
             <div className="bg-white w-full max-w-md rounded-xl p-6 shadow-lg relative">
+
               <button
                 onClick={handleCancel}
                 className="absolute top-3 right-3 text-2xl"
@@ -236,20 +248,22 @@ const Product = () => {
               </button>
 
               <h2 className="text-xl font-semibold mb-5">
+
                 {editId
-                  ? "Update Product"
-                  : "Add Product"}
+                  ? "Update Category"
+                  : "Add Category"}
               </h2>
 
               <form
                 onSubmit={handleSubmit}
                 className="space-y-4"
               >
+
                 <input
                   type="text"
-                  name="name"
-                  placeholder="Product Name"
-                  value={form.name}
+                  name="categoryName"
+                  placeholder="Category Name"
+                  value={form.categoryName}
                   onChange={handleChange}
                   className="w-full border rounded-lg px-3 py-2"
                 />
@@ -263,41 +277,6 @@ const Product = () => {
                   className="w-full border rounded-lg px-3 py-2"
                 />
 
-                <select
-                  name="category"
-                  value={form.category}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg px-3 py-2"
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
-                    <option
-                      key={category._id}
-                      value={category._id}
-                    >
-                      {category.categoryName}
-                    </option>
-                  ))}
-                </select>
-
-                <input
-                  type="number"
-                  name="price"
-                  placeholder="Price"
-                  value={form.price}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg px-3 py-2"
-                />
-
-                <input
-                  type="number"
-                  name="stock"
-                  placeholder="Stock"
-                  value={form.stock}
-                  onChange={handleChange}
-                  className="w-full border rounded-lg px-3 py-2"
-                />
-
                 {formError && (
                   <div className="text-red-500 text-sm">
                     {formError}
@@ -305,6 +284,7 @@ const Product = () => {
                 )}
 
                 <div className="flex justify-end gap-3">
+
                   <button
                     type="button"
                     onClick={handleCancel}
@@ -330,26 +310,38 @@ const Product = () => {
           </div>
         )}
 
+
         {/* LOADING */}
         {loading ? (
+
           <div className="text-center py-10">
             Loading...
           </div>
-        ) : products.length === 0 ? (
+
+        ) : categories.length === 0 ? (
+
           <div className="text-center py-10 text-gray-500">
-            No Products Found
+            No Categories Found
           </div>
+
         ) : (
+
           <div className="grid gap-5">
-            {products.map((product) => (
+
+            {categories.map((category) => (
+
               <div
-                key={product._id}
+                key={category._id}
                 className="bg-white border rounded-xl p-5 shadow-sm relative"
               >
+
                 {/* ACTION BUTTONS */}
                 <div className="absolute top-3 right-3 flex gap-2">
+
                   <button
-                    onClick={() => handleEdit(product)}
+                    onClick={() =>
+                      handleEdit(category)
+                    }
                     className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full"
                   >
                     <FaRegEdit />
@@ -357,7 +349,7 @@ const Product = () => {
 
                   <button
                     onClick={() =>
-                      handleDelete(product._id)
+                      handleDelete(category._id)
                     }
                     className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full"
                   >
@@ -365,45 +357,34 @@ const Product = () => {
                   </button>
                 </div>
 
-                {/* PRODUCT INFO */}
+
+                {/* CATEGORY INFO */}
                 <h2 className="text-xl font-bold text-gray-800 mb-2">
-                  {product.name}
+                  {category.categoryName}
                 </h2>
 
                 <p className="text-gray-600 mb-3">
-                  {product.description}
+                  {category.description}
                 </p>
 
                 <div className="space-y-1 text-sm">
-                  <div>
-                    <span className="font-semibold">
-                      Category:
-                    </span>{" "}
-                    {categories.find((cat) => cat._id === product.category)?.categoryName ||
-                      product.category}
-                  </div>
-
-                  <div>
-                    <span className="font-semibold">
-                      Price:
-                    </span>{" "}
-                    ₹{product.price}
-                  </div>
-
-                  <div>
-                    <span className="font-semibold">
-                      Stock:
-                    </span>{" "}
-                    {product.stock}
-                  </div>
 
                   <div>
                     <span className="font-semibold">
                       Status:
                     </span>{" "}
-                    {product.isActive
+                    {category.isActive
                       ? "Active"
                       : "Inactive"}
+                  </div>
+
+                  <div>
+                    <span className="font-semibold">
+                      Created:
+                    </span>{" "}
+                    {new Date(
+                      category.createdAt
+                    ).toLocaleDateString()}
                   </div>
                 </div>
               </div>
@@ -415,4 +396,4 @@ const Product = () => {
   );
 };
 
-export default Product;
+export default Category;

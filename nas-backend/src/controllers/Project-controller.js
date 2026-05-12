@@ -1,65 +1,75 @@
 const asyncHandler = require("../utils/async-handler");
 const { AppError } = require("../utils/errors");
 const ProjectService = require("../services/project-service");
-// const cloudinary = require('../config/cloudinary'); // image comment out
 
+
+// ================= CREATE PROJECT =================
 const createProject = asyncHandler(async (req, res) => {
-  // Destructure and accept optional fields: category, or
-  const { title, description, category, or } = req.body;
 
-  if (!title || !description) {
-    throw new AppError(400, "Title and description are required");
+  const {
+    name,
+    description,
+    category,
+    price,
+    stock,
+  } = req.body;
+
+  // Validation
+  if (!name || !description) {
+    throw new AppError(
+      400,
+      "Name and description are required"
+    );
   }
 
   const projectData = {
-    title,
+    name,
     description,
-    // link, // link comment out
-    // image: imageUrl, // image comment out
-    // public_id: publicId, // image comment out
+    category,
+    price,
+    stock,
   };
 
-  // Add 'category' or 'or' if at least one is present and valid (non-empty string)
-  if (typeof category === "string" && category.trim().length > 0) {
-    projectData.category = category.trim();
-  } else if (typeof or === "string" && or.trim().length > 0) {
-    projectData.or = or.trim();
-  }
-
-  // ProjectService.createProject will throw 400 if duplicate title found
-  const created = await ProjectService.createProject(projectData);
+  const createdProject =
+    await ProjectService.createProject(projectData);
 
   return res.status(201).json({
     success: true,
-    message: "Project Created Successfully",
-    data: created,
+    message: "Project created successfully",
+    data: createdProject,
   });
 });
 
-const getAllProjects = asyncHandler(async (req, res) => {
-  const projects = await ProjectService.getAllProjects();
 
-  if (!projects || projects.length === 0) {
-    return res.status(200).json({
-      success: true,
-      message: "No projects found",
-      data: [],
-    });
-  }
+// ================= GET ALL PROJECTS =================
+const getAllProjects = asyncHandler(async (req, res) => {
+
+  const projects =
+    await ProjectService.getAllProjects();
 
   return res.status(200).json({
     success: true,
-    message: "Projects Fetched Successfully",
+    count: projects.length,
     data: projects,
   });
 });
 
-const getProject = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  if (!id) throw new AppError(400, "Project Id required");
 
-  const project = await ProjectService.getProject(id);
-  if (!project) throw new AppError(404, "Project not found");
+// ================= GET SINGLE PROJECT =================
+const getProject = asyncHandler(async (req, res) => {
+
+  const { id } = req.params;
+
+  if (!id) {
+    throw new AppError(400, "Project ID is required");
+  }
+
+  const project =
+    await ProjectService.getProject(id);
+
+  if (!project) {
+    throw new AppError(404, "Project not found");
+  }
 
   return res.status(200).json({
     success: true,
@@ -67,70 +77,85 @@ const getProject = asyncHandler(async (req, res) => {
   });
 });
 
+
+// ================= UPDATE PROJECT =================
 const updateProject = asyncHandler(async (req, res) => {
+
   const { id } = req.params;
-  if (!id) throw new AppError(400, "Project Id required");
 
-  // Accept update for title, description, category, or
-  const { title, description, category, or } = req.body;
-  const updatePayload = { title, description };
-
-  // Only include 'category' or 'or' if at least one is present and valid (non-empty string)
-  if (typeof category === "string" && category.trim().length > 0) {
-    updatePayload.category = category.trim();
-    if (Object.prototype.hasOwnProperty.call(updatePayload, 'or')) {
-      delete updatePayload.or;
-    }
-  } else if (typeof or === "string" && or.trim().length > 0) {
-    updatePayload.or = or.trim();
-    if (Object.prototype.hasOwnProperty.call(updatePayload, 'category')) {
-      delete updatePayload.category;
-    }
+  if (!id) {
+    throw new AppError(400, "Project ID is required");
   }
 
+  const {
+    name,
+    description,
+    category,
+    price,
+    stock,
+  } = req.body;
+
+  const updateData = {
+    name,
+    description,
+    category,
+    price,
+    stock,
+  };
+
   // Remove undefined fields
-  Object.keys(updatePayload).forEach(key => {
-    if (updatePayload[key] === undefined) delete updatePayload[key];
+  Object.keys(updateData).forEach((key) => {
+    if (updateData[key] === undefined) {
+      delete updateData[key];
+    }
   });
 
-  const updated = await ProjectService.updateProject(id, updatePayload);
-  if (!updated) throw new AppError(404, "Project not found or update failed");
+  const updatedProject =
+    await ProjectService.updateProject(
+      id,
+      updateData
+    );
+
+  if (!updatedProject) {
+    throw new AppError(
+      404,
+      "Project not found"
+    );
+  }
 
   return res.status(200).json({
     success: true,
     message: "Project updated successfully",
-    data: updated,
+    data: updatedProject,
   });
 });
 
+
+// ================= DELETE PROJECT =================
 const deleteProject = asyncHandler(async (req, res) => {
+
   const { id } = req.params;
 
   if (!id) {
-    throw new AppError(400, "Project Id required");
+    throw new AppError(400, "Project ID is required");
   }
 
-  const project = await ProjectService.getProject(id);
+  const deletedProject =
+    await ProjectService.deleteProject(id);
 
-  if (!project) {
-    throw new AppError(404, "Project Not Found");
+  if (!deletedProject) {
+    throw new AppError(
+      404,
+      "Project not found"
+    );
   }
-
-  // if (project.public_id) {
-  //   try {
-  //     await cloudinary.uploader.destroy(project.public_id);
-  //   } catch (err) {
-  //     console.error("Cloudinary destroy error:", err.message || err);
-  //   }
-  // }
-
-  await ProjectService.deleteProject(id);
 
   return res.status(200).json({
     success: true,
-    message: "Project Deleted Successfully"
+    message: "Project deleted successfully",
   });
 });
+
 
 module.exports = {
   createProject,

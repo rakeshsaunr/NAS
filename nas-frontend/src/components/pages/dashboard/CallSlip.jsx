@@ -1,200 +1,112 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaRegEdit } from "react-icons/fa";
-import { RiDeleteBin5Line } from "react-icons/ri";
 
-const API_BASE = "http://localhost:5000/api/v1/callslip";
-
-const paymentModes = [
-  "",
-  "Cash",
-  "Cheque",
-  "Bank Transfer",
-  "UPI",
-  "Card",
-  "Other",
-];
-
-const paymentStatuses = [
-  "",
-  "Paid",
-  "Unpaid",
-  "Pending",
-  "Partial",
-  "Failed",
-  "Refunded",
-];
-
-// Dropdown options for Department and Complaint Type
-const departmentOptions = [
-  "",
-  "Sales",
-  "Service",
-  "Support",
-  "Admin",
-  "Accounts",
-  "IT",
-  "Logistics",
-  "Purchase",
-  "Operations",
-  "Other",
-];
-
-const complaintTypeOptions = [
-  "",
-  "Installation",
-  "Maintenance",
-  "Service",
-  "Product Defect",
-  "AMC Visit",
-  "Technical Query",
-  "Other"
-];
-
-const initialForm = {
-  customerName: "",
-  department: "",
-  departmentOther: "",
-  companyName: "",
-  contactNumber: "",
-  email: "",
-  address: "",
-  callNumber: "",
-  callDate: "",
-  callTime: "",
-
-  callType: {
-    projectWork: false,
-    installation: false,
-    maintenance: false,
-    amcVisit: false,
-    serviceCall: false,
-    siteSurvey: false,
-  },
-
-  charges: {
-    serviceCharges: "",
-    totalAmount: "",
-    paymentMode: "",
-    paymentStatus: "",
-  },
-
-  products: {
-    cctv: false,
-    biometric: false,
-    networking: false,
-    security: false,
-    epabx: false,
-    automation: false,
-  },
-
-  complaintType: "",
-  problemDescription: "",
-  serviceDetails: "",
-  errorDetails: "",
-  priorityLevel: "Low",
-  loggedBy: "",
-};
-
-const priorityLevels = ["Low", "Medium", "High", "Urgent"];
-
-function buildCallSlipPayload(form) {
-  return {
-    ...form,
-
-    // For plain input, no need for other field, just send department as it is
-    department: form.department,
-
-    charges: {
-      ...form.charges,
-
-      serviceCharges:
-        form.charges.serviceCharges === ""
-          ? 0
-          : Number(form.charges.serviceCharges),
-
-      totalAmount:
-        form.charges.totalAmount === ""
-          ? 0
-          : Number(form.charges.totalAmount),
-    },
-
-    callType: {
-      ...initialForm.callType,
-      ...form.callType,
-    },
-
-    products: {
-      ...initialForm.products,
-      ...form.products,
-    },
-  };
-}
+const API_BASE =
+  "http://localhost:5000/api/v1/callslip";
 
 const CallSlip = () => {
   const [callSlips, setCallSlips] = useState([]);
-  const [form, setForm] = useState(initialForm);
-  const [showForm, setShowForm] = useState(false);
-  const [editId, setEditId] = useState(null);
+
+  const [departments, setDepartments] = useState([]);
+  const [categories, setCategories] = useState([]);
+
   const [loading, setLoading] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
-  // ================= FETCH =================
+  const [form, setForm] = useState({
+    customerName: "",
+    companyName: "",
+    contactNumber: "",
+    email: "",
+    address: "",
+
+    department: "",
+    category: "",
+    productType: "",
+
+    callDate: "",
+    callTime: "",
+
+    callType: "",
+
+    complaintType: "",
+    problemDescription: "",
+    serviceDetails: "",
+    errorDetails: "",
+
+    priorityLevel: "Low",
+
+    charges: {
+      serviceCharges: "",
+      totalAmount: "",
+      paymentMode: "",
+      paymentStatus: "Pending",
+    },
+
+    serviceStatus: "Pending",
+
+    assignedEngineer: "",
+
+    loggedBy: "",
+
+    remarks: "",
+  });
+
+  // ================= FETCH CALL SLIPS =================
+
   const fetchCallSlips = async () => {
-    setLoading(true);
-
     try {
+      setLoading(true);
+
       const res = await axios.get(API_BASE);
 
-      console.log("GET RESPONSE =>", res.data);
-
-      let slips = [];
-
-      if (Array.isArray(res.data)) {
-        slips = res.data;
-      } else if (Array.isArray(res.data.data)) {
-        slips = res.data.data;
-      } else if (Array.isArray(res.data.callSlips)) {
-        slips = res.data.callSlips;
-      }
-
-      setCallSlips(slips);
+      setCallSlips(res.data.data || []);
     } catch (error) {
-      console.log("FETCH ERROR =>", error);
+      console.log(error);
     } finally {
       setLoading(false);
     }
   };
 
+  // ================= FETCH DEPARTMENTS =================
+
+  const fetchDepartments = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/v1/department"
+      );
+
+      setDepartments(res.data.data || []);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ================= FETCH CATEGORIES =================
+
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/v1/category"
+      );
+
+      setCategories(res.data.data || []);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     fetchCallSlips();
+    fetchDepartments();
+    fetchCategories();
   }, []);
 
-  // ================= INPUT CHANGE =================
+  // ================= HANDLE CHANGE =================
+
   const handleChange = (e) => {
-    const { name, value, checked } = e.target;
+    const { name, value } = e.target;
 
-    if (name.startsWith("callType.")) {
-      const key = name.split(".")[1];
-
-      setForm((prev) => ({
-        ...prev,
-        callType: {
-          ...prev.callType,
-          [key]: checked,
-        },
-      }));
-    } else if (name.startsWith("products.")) {
-      const key = name.split(".")[1];
-
-      setForm((prev) => ({
-        ...prev,
-        products: {
-          ...prev.products,
-          [key]: checked,
-        },
-      }));
-    } else if (name.startsWith("charges.")) {
+    if (name.startsWith("charges.")) {
       const key = name.split(".")[1];
 
       setForm((prev) => ({
@@ -212,577 +124,552 @@ const CallSlip = () => {
     }
   };
 
-  // ================= NEW =================
-  const handleNewCallSlip = () => {
-    setForm(initialForm);
-    setEditId(null);
-    setShowForm(true);
-  };
-
   // ================= SUBMIT =================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setSubmitting(true);
-
     try {
-      const payload = buildCallSlipPayload(form);
+      const payload = {
+        ...form,
 
-      let res;
+        charges: {
+          ...form.charges,
 
-      if (editId) {
-        res = await axios.put(`${API_BASE}/${editId}`, payload);
-      } else {
-        res = await axios.post(API_BASE, payload);
-      }
+          serviceCharges: Number(
+            form.charges.serviceCharges
+          ),
 
-      console.log("SAVE RESPONSE =>", res.data);
+          totalAmount: Number(
+            form.charges.totalAmount
+          ),
+        },
+      };
 
-      // Save hone ke baad latest data fetch
-      await fetchCallSlips();
+      await axios.post(API_BASE, payload);
 
-      setForm(initialForm);
-      setEditId(null);
-      setShowForm(false);
+      alert("Call Slip Created Successfully");
+
+      fetchCallSlips();
+
+      setForm({
+        customerName: "",
+        companyName: "",
+        contactNumber: "",
+        email: "",
+        address: "",
+
+        department: "",
+        category: "",
+        productType: "",
+
+        callDate: "",
+        callTime: "",
+
+        callType: "",
+
+        complaintType: "",
+        problemDescription: "",
+        serviceDetails: "",
+        errorDetails: "",
+
+        priorityLevel: "Low",
+
+        charges: {
+          serviceCharges: "",
+          totalAmount: "",
+          paymentMode: "",
+          paymentStatus: "Pending",
+        },
+
+        serviceStatus: "Pending",
+
+        assignedEngineer: "",
+
+        loggedBy: "",
+
+        remarks: "",
+      });
     } catch (error) {
-      console.log("SAVE ERROR =>", error);
+      console.log(error);
 
       alert(
-        error?.response?.data?.message || "Something went wrong"
+        error?.response?.data?.message
       );
-    } finally {
-      setSubmitting(false);
     }
   };
-
-  // ================= EDIT =================
-  const handleEdit = (slip) => {
-    setEditId(slip._id);
-
-    setForm({
-      ...initialForm,
-      ...slip,
-
-      // No need to handle departmentOther, just keep department as plain text
-      callType: {
-        ...initialForm.callType,
-        ...slip.callType,
-      },
-
-      products: {
-        ...initialForm.products,
-        ...slip.products,
-      },
-
-      charges: {
-        ...initialForm.charges,
-        ...slip.charges,
-
-        serviceCharges:
-          slip.charges?.serviceCharges !== undefined
-            ? String(slip.charges.serviceCharges)
-            : "",
-
-        totalAmount:
-          slip.charges?.totalAmount !== undefined
-            ? String(slip.charges.totalAmount)
-            : "",
-      },
-    });
-
-    setShowForm(true);
-  };
-
-  // ================= DELETE =================
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Delete this call slip?"
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      await axios.delete(`${API_BASE}/${id}`);
-
-      setCallSlips((prev) =>
-        prev.filter((item) => item._id !== id)
-      );
-    } catch (error) {
-      console.log("DELETE ERROR =>", error);
-    }
-  };
-
-  // List of columns for table
-  const tableColumns = [
-    { label: "Action", key: "actions" },
-    { label: "Customer Name", key: "customerName" },
-    { label: "Company", key: "companyName" },
-    { label: "Contact", key: "contactNumber" },
-    { label: "Department", key: "department" },
-    { label: "Complaint Type", key: "complaintType" },
-    { label: "Priority", key: "priorityLevel" },
-    { label: "Total Amount", key: "charges.totalAmount" },
-    { label: "Payment Mode", key: "charges.paymentMode" },
-    { label: "Payment Status", key: "charges.paymentStatus" },
-    { label: "Call Date", key: "callDate" },
-    { label: "Call Time", key: "callTime" },
-    { label: "Call Number", key: "callNumber" },
-    { label: "Logged By", key: "loggedBy" },
-    { label: "Service Charges", key: "charges.serviceCharges" },
-    { label: "Problem Description", key: "problemDescription" },
-    { label: "Service Details", key: "serviceDetails" },
-    { label: "Error Details", key: "errorDetails" },
-    { label: "Call Type", key: "callType" },
-    { label: "Products", key: "products" },
-    { label: "Email", key: "email" },
-    { label: "Address", key: "address" },
-  ];
-
-  // Helper for nested value retrieval
-  function getValueByKey(obj, keyPath) {
-    if (typeof keyPath !== "string") return "";
-    if (keyPath === "callType") {
-      if (!obj.callType) return "";
-      // Show checked call types as comma separated
-      return Object.entries(obj.callType)
-        .filter(([k, v]) => v)
-        .map(([k]) => k)
-        .join(", ");
-    }
-    if (keyPath === "products") {
-      if (!obj.products) return "";
-      // Show checked products as comma separated
-      return Object.entries(obj.products)
-        .filter(([k, v]) => v)
-        .map(([k]) => k)
-        .join(", ");
-    }
-    if (keyPath.includes(".")) {
-      const keys = keyPath.split(".");
-      let value = obj;
-      for (const k of keys) {
-        value = value ? value[k] : undefined;
-      }
-      return value === undefined ? "" : value;
-    }
-    return obj[keyPath] === undefined ? "" : obj[keyPath];
-  }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-5">
+    <div className="p-5 bg-gray-100 min-h-screen">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-5">
-        <div>
-          <h2 className="text-3xl font-semibold text-gray-800">
-            Call Management
-          </h2>
 
-          <p className="text-gray-500">
-            Manage all service requests
-          </p>
-        </div>
+      <div className="mb-5">
+        <h1 className="text-3xl font-bold">
+          Call Slip Management
+        </h1>
 
-        <button
-          onClick={handleNewCallSlip}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md text-xs"
-          style={{ fontSize: "0.75rem" }}
-        >
-          + New Call Slip
-        </button>
-   
-   
+        <p className="text-gray-500">
+          Manage customer service requests
+        </p>
       </div>
 
-      {/* LOADING */}
-      {loading ? (
-        <div className="text-center py-10 text-lg">
-          Loading...
-        </div>
-      ) : (
-        <>
-          {/* EMPTY */}
-          {callSlips.length === 0 ? (
-            <div className="bg-white rounded-xl p-10 text-center shadow">
-              <h2 className="text-xl font-semibold text-gray-700">
-                No Call Slips Found
-              </h2>
-            </div>
-          ) : (
-            // TABLE
-            <div className="bg-white rounded-xl p-4 shadow overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200 text-sm">
-                <thead>
-                  <tr>
-                    {tableColumns.map((col) => (
-                      <th
-                        key={col.key}
-                        className="px-4 py-2 font-semibold text-left bg-gray-50 text-gray-700"
-                      >
-                        {col.label}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {callSlips.map((slip, index) => (
-                    <tr
-                      key={slip._id || index}
-                      className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
-                    >
-                      {tableColumns.map((col) =>
-                        col.key === "actions" ? (
-                          <td
-                            key={col.key}
-                            className="px-3 py-2 whitespace-nowrap"
-                            style={{ minWidth: 90 }}
-                          >
-                            <button
-                              onClick={() => handleEdit(slip)}
-                              title="Edit"
-                              className="bg-blue-100 text-blue-600 p-2 rounded-lg mr-2"
-                            >
-                              <FaRegEdit />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(slip._id)}
-                              title="Delete"
-                              className="bg-red-100 text-red-600 p-2 rounded-lg"
-                            >
-                              <RiDeleteBin5Line />
-                            </button>
-                          </td>
-                        ) : (
-                          <td key={col.key} className="px-3 py-2">
-                            {
-                              col.key === "charges.totalAmount" ? (
-                                (
-                                  slip.charges &&
-                                  slip.charges.totalAmount !== undefined &&
-                                  slip.charges.totalAmount !== ""
-                                )
-                                  ? `₹ ${slip.charges.totalAmount}`
-                                  : ""
-                              )
-                              : getValueByKey(slip, col.key)
-                            }
-                          </td>
-                        )
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </>
-      )}
+      {/* FORM */}
 
-      {/* MODAL */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-center p-4 z-50">
-          <div className="bg-white w-full max-w-4xl rounded-2xl p-6 max-h-[90vh] overflow-y-auto">
-            {/* TOP */}
-            <div className="flex justify-between items-center mb-5">
-              <h2 className="text-2xl font-bold">
-                {editId
-                  ? "Update Call Slip"
-                  : "New Call Slip"}
-              </h2>
+      <div className="bg-white p-5 rounded-2xl shadow">
+        <form
+          onSubmit={handleSubmit}
+          className="grid md:grid-cols-2 gap-4"
+        >
+          <input
+            type="text"
+            name="customerName"
+            placeholder="Customer Name"
+            className="input"
+            value={form.customerName}
+            onChange={handleChange}
+            required
+          />
 
-              <button
-                onClick={() => setShowForm(false)}
-                className="text-xl"
+          <input
+            type="text"
+            name="companyName"
+            placeholder="Company Name"
+            className="input"
+            value={form.companyName}
+            onChange={handleChange}
+          />
+
+          <input
+            type="text"
+            name="contactNumber"
+            placeholder="Contact Number"
+            className="input"
+            value={form.contactNumber}
+            onChange={handleChange}
+          />
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            className="input"
+            value={form.email}
+            onChange={handleChange}
+          />
+
+          <input
+            type="text"
+            name="address"
+            placeholder="Address"
+            className="input"
+            value={form.address}
+            onChange={handleChange}
+          />
+
+          {/* DEPARTMENT */}
+
+          <select
+            name="department"
+            className="input"
+            value={form.department}
+            onChange={handleChange}
+            required
+          >
+            <option value="">
+              Select Department
+            </option>
+
+            {departments.map((item) => (
+              <option
+                key={item._id}
+                value={item._id}
               >
-                ✕
-              </button>
-            </div>
+                {item.name}
+              </option>
+            ))}
+          </select>
 
-            {/* FORM */}
-            <form
-              onSubmit={handleSubmit}
-              className="grid md:grid-cols-2 gap-4"
-            >
-              <input
-                name="customerName"
-                placeholder="Customer Name"
-                className="input"
-                value={form.customerName}
-                onChange={handleChange}
-              />
+          {/* CATEGORY */}
 
-              <input
-                name="department"
-                placeholder="Department"
-                className="input"
-                value={form.department}
-                onChange={handleChange}
-              />
+          <select
+            name="category"
+            className="input"
+            value={form.category}
+            onChange={handleChange}
+            required
+          >
+            <option value="">
+              Select Category
+            </option>
 
-              <input
-                name="companyName"
-                placeholder="Company Name"
-                className="input"
-                value={form.companyName}
-                onChange={handleChange}
-              />
-
-              <input
-                name="contactNumber"
-                placeholder="Contact Number"
-                className="input"
-                value={form.contactNumber}
-                onChange={handleChange}
-              />
-
-              <input
-                name="email"
-                placeholder="Email"
-                className="input"
-                value={form.email}
-                onChange={handleChange}
-              />
-
-              <input
-                name="address"
-                placeholder="Address"
-                className="input"
-                value={form.address}
-                onChange={handleChange}
-              />
-
-              <input
-                name="callNumber"
-                placeholder="Call Number"
-                className="input"
-                value={form.callNumber}
-                onChange={handleChange}
-              />
-
-              <input
-                type="date"
-                name="callDate"
-                className="input"
-                value={form.callDate}
-                onChange={handleChange}
-              />
-
-              <input
-                type="time"
-                name="callTime"
-                className="input"
-                value={form.callTime}
-                onChange={handleChange}
-              />
-
-              <select
-                name="priorityLevel"
-                className="input"
-                value={form.priorityLevel}
-                onChange={handleChange}
+            {categories.map((item) => (
+              <option
+                key={item._id}
+                value={item._id}
               >
-                {priorityLevels.map((item) => (
-                  <option key={item}>{item}</option>
-                ))}
-              </select>
+                {item.name}
+              </option>
+            ))}
+          </select>
 
-              <input
-                name="loggedBy"
-                placeholder="Logged By"
-                className="input"
-                value={form.loggedBy}
-                onChange={handleChange}
-              />
+          {/* PRODUCT TYPE */}
 
-              <select
-                name="complaintType"
-                className="input"
-                value={form.complaintType}
-                onChange={handleChange}
+          <select
+            name="productType"
+            className="input"
+            value={form.productType}
+            onChange={handleChange}
+          >
+            <option value="">
+              Select Product Type
+            </option>
+
+            {categories.map((item) => (
+              <option
+                key={item._id}
+                value={item._id}
               >
-                <option value="">Select Complaint Type</option>
-                {complaintTypeOptions
-                  .filter((type) => type !== "")
-                  .map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-              </select>
+                {item.name}
+              </option>
+            ))}
+          </select>
 
-              <input
-                name="problemDescription"
-                placeholder="Problem Description"
-                className="input"
-                value={form.problemDescription}
-                onChange={handleChange}
-              />
+          {/* CALL DATE */}
 
-              <input
-                name="serviceDetails"
-                placeholder="Service Details"
-                className="input"
-                value={form.serviceDetails}
-                onChange={handleChange}
-              />
+          <input
+            type="date"
+            name="callDate"
+            className="input"
+            value={form.callDate}
+            onChange={handleChange}
+          />
 
-              <input
-                name="errorDetails"
-                placeholder="Error Details"
-                className="input"
-                value={form.errorDetails}
-                onChange={handleChange}
-              />
+          {/* CALL TIME */}
 
-              {/* CHARGES */}
-              <input
-                type="number"
-                name="charges.serviceCharges"
-                placeholder="Service Charges"
-                className="input"
-                value={form.charges.serviceCharges}
-                onChange={handleChange}
-              />
+          <input
+            type="time"
+            name="callTime"
+            className="input"
+            value={form.callTime}
+            onChange={handleChange}
+          />
 
-              <input
-                type="number"
-                name="charges.totalAmount"
-                placeholder="Total Amount"
-                className="input"
-                value={form.charges.totalAmount}
-                onChange={handleChange}
-              />
+          {/* CALL TYPE */}
 
-              {/* Payment Mode as Dropdown */}
-              <select
-                name="charges.paymentMode"
-                className="input"
-                value={form.charges.paymentMode}
-                onChange={handleChange}
+          <select
+            name="callType"
+            className="input"
+            value={form.callType}
+            onChange={handleChange}
+          >
+            <option value="">
+              Select Call Type
+            </option>
+
+            <option value="Project Work">
+              Project Work
+            </option>
+
+            <option value="Installation">
+              Installation
+            </option>
+
+            <option value="Maintenance">
+              Maintenance
+            </option>
+
+            <option value="AMC Visit">
+              AMC Visit
+            </option>
+
+            <option value="Service Call">
+              Service Call
+            </option>
+
+            <option value="Site Survey">
+              Site Survey
+            </option>
+          </select>
+
+          {/* PRIORITY */}
+
+          <select
+            name="priorityLevel"
+            className="input"
+            value={form.priorityLevel}
+            onChange={handleChange}
+          >
+            <option value="Low">
+              Low
+            </option>
+
+            <option value="Medium">
+              Medium
+            </option>
+
+            <option value="High">
+              High
+            </option>
+
+            <option value="Urgent">
+              Urgent
+            </option>
+          </select>
+
+          {/* COMPLAINT */}
+
+          <input
+            type="text"
+            name="complaintType"
+            placeholder="Complaint Type"
+            className="input"
+            value={form.complaintType}
+            onChange={handleChange}
+          />
+
+          <textarea
+            name="problemDescription"
+            placeholder="Problem Description"
+            className="input md:col-span-2"
+            value={form.problemDescription}
+            onChange={handleChange}
+          />
+
+          <textarea
+            name="serviceDetails"
+            placeholder="Service Details"
+            className="input md:col-span-2"
+            value={form.serviceDetails}
+            onChange={handleChange}
+          />
+
+          <textarea
+            name="errorDetails"
+            placeholder="Error Details"
+            className="input md:col-span-2"
+            value={form.errorDetails}
+            onChange={handleChange}
+          />
+
+          {/* CHARGES */}
+
+          <input
+            type="number"
+            name="charges.serviceCharges"
+            placeholder="Service Charges"
+            className="input"
+            value={form.charges.serviceCharges}
+            onChange={handleChange}
+          />
+
+          <input
+            type="number"
+            name="charges.totalAmount"
+            placeholder="Total Amount"
+            className="input"
+            value={form.charges.totalAmount}
+            onChange={handleChange}
+          />
+
+          {/* PAYMENT MODE */}
+
+          <select
+            name="charges.paymentMode"
+            className="input"
+            value={form.charges.paymentMode}
+            onChange={handleChange}
+          >
+            <option value="">
+              Select Payment Mode
+            </option>
+
+            <option value="Cash">
+              Cash
+            </option>
+
+            <option value="UPI">
+              UPI
+            </option>
+
+            <option value="Card">
+              Card
+            </option>
+
+            <option value="Bank Transfer">
+              Bank Transfer
+            </option>
+
+            <option value="Cheque">
+              Cheque
+            </option>
+          </select>
+
+          {/* PAYMENT STATUS */}
+
+          <select
+            name="charges.paymentStatus"
+            className="input"
+            value={form.charges.paymentStatus}
+            onChange={handleChange}
+          >
+            <option value="Pending">
+              Pending
+            </option>
+
+            <option value="Paid">
+              Paid
+            </option>
+          </select>
+
+          {/* SERVICE STATUS */}
+
+          <select
+            name="serviceStatus"
+            className="input"
+            value={form.serviceStatus}
+            onChange={handleChange}
+          >
+            <option value="Pending">
+              Pending
+            </option>
+
+            <option value="In Progress">
+              In Progress
+            </option>
+
+            <option value="Completed">
+              Completed
+            </option>
+
+            <option value="Cancelled">
+              Cancelled
+            </option>
+          </select>
+
+          {/* ENGINEER */}
+
+          <input
+            type="text"
+            name="assignedEngineer"
+            placeholder="Assigned Engineer"
+            className="input"
+            value={form.assignedEngineer}
+            onChange={handleChange}
+          />
+
+          {/* LOGGED BY */}
+
+          <input
+            type="text"
+            name="loggedBy"
+            placeholder="Logged By"
+            className="input"
+            value={form.loggedBy}
+            onChange={handleChange}
+          />
+
+          {/* REMARKS */}
+
+          <textarea
+            name="remarks"
+            placeholder="Remarks"
+            className="input md:col-span-2"
+            value={form.remarks}
+            onChange={handleChange}
+          />
+
+          {/* BUTTON */}
+
+          <button
+            type="submit"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl md:col-span-2"
+          >
+            Save Call Slip
+          </button>
+        </form>
+      </div>
+
+      {/* TABLE */}
+
+      <div className="bg-white mt-6 rounded-2xl shadow overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-3 text-left">
+                Customer
+              </th>
+
+              <th className="p-3 text-left">
+                Company
+              </th>
+
+              <th className="p-3 text-left">
+                Department
+              </th>
+
+              <th className="p-3 text-left">
+                Category
+              </th>
+
+              <th className="p-3 text-left">
+                Priority
+              </th>
+
+              <th className="p-3 text-left">
+                Status
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {callSlips.map((item) => (
+              <tr
+                key={item._id}
+                className="border-b"
               >
-                <option value="">Select Payment Mode</option>
-                {paymentModes
-                  .filter((m) => m !== "")
-                  .map((mode) => (
-                    <option key={mode} value={mode}>
-                      {mode}
-                    </option>
-                  ))}
-              </select>
+                <td className="p-3">
+                  {item.customerName}
+                </td>
 
-              {/* Payment Status as Dropdown */}
-              <select
-                name="charges.paymentStatus"
-                className="input"
-                value={form.charges.paymentStatus}
-                onChange={handleChange}
-              >
-                <option value="">Select Payment Status</option>
-                {paymentStatuses
-                  .filter((status) => status !== "")
-                  .map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-              </select>
+                <td className="p-3">
+                  {item.companyName}
+                </td>
 
-              {/* CALL TYPE */}
-              <div className="md:col-span-2">
-                <h3 className="font-semibold mb-2">
-                  Call Type
-                </h3>
+                <td className="p-3">
+                  {item.department?.name}
+                </td>
 
-                <div className="flex flex-wrap gap-4">
-                  {Object.keys(initialForm.callType).map(
-                    (type) => (
-                      <label
-                        key={type}
-                        className="flex items-center gap-2"
-                      >
-                        <input
-                          type="checkbox"
-                          name={`callType.${type}`}
-                          checked={form.callType[type]}
-                          onChange={handleChange}
-                        />
+                <td className="p-3">
+                  {item.category?.name}
+                </td>
 
-                        {type}
-                      </label>
-                    )
-                  )}
-                </div>
-              </div>
+                <td className="p-3">
+                  {item.priorityLevel}
+                </td>
 
-              {/* PRODUCTS */}
-              <div className="md:col-span-2">
-                <h3 className="font-semibold mb-2">
-                  Products
-                </h3>
-
-                <div className="flex flex-wrap gap-4">
-                  {Object.keys(initialForm.products).map(
-                    (product) => (
-                      <label
-                        key={product}
-                        className="flex items-center gap-2"
-                      >
-                        <input
-                          type="checkbox"
-                          name={`products.${product}`}
-                          checked={form.products[product]}
-                          onChange={handleChange}
-                        />
-
-                        {product}
-                      </label>
-                    )
-                  )}
-                </div>
-              </div>
-
-              {/* BUTTON */}
-              <div className="md:col-span-2 mt-4">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl"
-                >
-                  {submitting
-                    ? "Saving..."
-                    : "Save Call Slip"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+                <td className="p-3">
+                  {item.serviceStatus}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* STYLE */}
+
       <style>{`
         .input {
           width: 100%;
-          padding: 12px;
           border: 1px solid #d1d5db;
+          padding: 12px;
           border-radius: 12px;
           outline: none;
         }
 
         .input:focus {
-          border-color: #6366f1;
-          box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
-        }
-        /* Table styles for improved appearance */
-        table {
-          border-collapse: collapse;
-        }
-        th, td {
-          border-right: 1px solid #ededed;
-        }
-        th:last-child, td:last-child {
-          border-right: none;
-        }
-        tbody tr:last-child td {
-          border-bottom: none;
+          border-color: #4f46e5;
+          box-shadow: 0 0 0 3px rgba(79,70,229,0.2);
         }
       `}</style>
     </div>

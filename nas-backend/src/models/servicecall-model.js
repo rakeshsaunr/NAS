@@ -1,69 +1,262 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const serviceSchema = new mongoose.Schema(
   {
-    // Call Details
+    // ===========================================
+    // CALL DETAILS
+    // ===========================================
+
     callSheetNumber: {
-      type: String, // This could be an auto-incremented value in future
-      required: true,
-      unique: true,
-    },
-    date: {
-      type: Date,
-      required: true,
-    },
-    callStartTime: {
-      type: String, // Store as string (e.g. "10:30 AM"). Could consider Date if needed.
-      required: true,
-    },
-    callEndTime: {
       type: String,
-      required: true,
-    },
-    totalWorkingHour: {
-      type: String, // Store as calculated string ("2 hr 15 min") or Number (minutes)
+      unique: true,
+      trim: true,
     },
 
-    // Customer & Company Details
-    companyName: {
-      type: String,
-      required: true,
+    callDate: {
+      type: Date,
+      default: Date.now,
     },
+
+    callStartTime: {
+      type: String,
+      trim: true,
+    },
+
+    callEndTime: {
+      type: String,
+      trim: true,
+    },
+
+    totalWorkingHour: {
+      type: String,
+      trim: true,
+    },
+
+    // ===========================================
+    // CUSTOMER DETAILS
+    // ===========================================
+
     customerName: {
       type: String,
       required: true,
+      trim: true,
     },
 
-    // Work Details
-    workType: {
-      newInstallation: { type: Boolean, default: false },
-      serviceCall: { type: Boolean, default: false },
-      maintenance: { type: Boolean, default: false },
+    companyName: {
+      type: String,
+      trim: true,
     },
+
+    contactNumber: {
+      type: String,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+
+    address: {
+      type: String,
+      trim: true,
+    },
+
+    // ===========================================
+    // DEPARTMENT
+    // ===========================================
+
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+    },
+
+    // ===========================================
+    // CATEGORY
+    // ===========================================
+
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+    },
+
+    // ===========================================
+    // PRODUCT TYPE
+    // ===========================================
+
+    productType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+    },
+
+    // ===========================================
+    // WORK TYPE
+    // ===========================================
+
+    workType: {
+      type: String,
+      enum: [
+        "New Installation",
+        "Service Call",
+        "Maintenance",
+        "AMC Visit",
+        "Inspection",
+      ],
+    },
+
+    // ===========================================
+    // SERVICE DETAILS
+    // ===========================================
+
     wiringDetails: {
       type: String,
+      trim: true,
     },
+
     productDetails: {
       type: String,
+      trim: true,
     },
+
     serviceDescription: {
       type: String,
+      trim: true,
     },
+
+    problemDescription: {
+      type: String,
+      trim: true,
+    },
+
+    errorDetails: {
+      type: String,
+      trim: true,
+    },
+
+    // ===========================================
+    // PRIORITY
+    // ===========================================
+
+    priorityLevel: {
+      type: String,
+      enum: [
+        "Low",
+        "Medium",
+        "High",
+        "Urgent",
+      ],
+      default: "Low",
+    },
+
+    // ===========================================
+    // WORK STATUS
+    // ===========================================
+
     workStatus: {
       type: String,
-      enum: ["Pending", "In Progress", "Completed", "Closed", "Hold"],
+      enum: [
+        "Pending",
+        "In Progress",
+        "Completed",
+        "Closed",
+        "Hold",
+        "Cancelled",
+      ],
       default: "Pending",
     },
 
-    // Remarks
+    // ===========================================
+    // CHARGES
+    // ===========================================
+
+    charges: {
+      serviceCharges: {
+        type: Number,
+        default: 0,
+      },
+
+      totalAmount: {
+        type: Number,
+        default: 0,
+      },
+
+      paymentMode: {
+        type: String,
+        enum: [
+          "Cash",
+          "UPI",
+          "Card",
+          "Bank Transfer",
+          "Cheque",
+        ],
+      },
+
+      paymentStatus: {
+        type: String,
+        enum: [
+          "Pending",
+          "Paid",
+        ],
+        default: "Pending",
+      },
+    },
+
+    // ===========================================
+    // ENGINEER DETAILS
+    // ===========================================
+
+    assignedEngineer: {
+      type: String,
+      trim: true,
+    },
+
+    technicianName: {
+      type: String,
+      trim: true,
+    },
+
+    // ===========================================
+    // REMARKS
+    // ===========================================
+
     customerRemark: {
       type: String,
+      trim: true,
     },
+
     technicianRemarks: {
       type: String,
+      trim: true,
+    },
+
+    internalRemarks: {
+      type: String,
+      trim: true,
+    },
+
+    // ===========================================
+    // LOG DETAILS
+    // ===========================================
+
+    loggedBy: {
+      type: String,
+      trim: true,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model('ServiceCall', serviceSchema);
+const ServiceCall = mongoose.model(
+  "ServiceCall",
+  serviceSchema
+);
+
+module.exports = ServiceCall;

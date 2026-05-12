@@ -1,21 +1,73 @@
 const express = require("express");
+
 const router = express.Router();
 
-const controller = require("../../controllers/servicecall-controller");
+const {
+  createServiceCall,
+  getAllServiceCalls,
+  getServiceCallById,
+  updateServiceCall,
+  deleteServiceCall,
+} = require(
+  "../../controllers/servicecall-controller"
+);
 
-// CREATE
-router.post("/", controller.createServiceCall);
+/*
+|--------------------------------------------------------------------------
+| SERVICE CALL ROUTES
+|--------------------------------------------------------------------------
+| Base URL : /api/v1/servicecall
+|--------------------------------------------------------------------------
+*/
 
-// GET ALL
-router.get("/", controller.getAllServiceCalls);
+// ===========================================
+// CREATE SERVICE CALL
+// POST : /api/v1/servicecall
+// ===========================================
 
-// GET SINGLE
-router.get("/:id", controller.getServiceCallById);
+router.post(
+  "/",
+  createServiceCall
+);
 
-// UPDATE
-router.put("/:id", controller.updateServiceCall);
+// ===========================================
+// GET ALL SERVICE CALLS
+// GET : /api/v1/servicecall
+// ===========================================
 
-// DELETE
-router.delete("/:id", controller.deleteServiceCall);
+router.get(
+  "/",
+  getAllServiceCalls
+);
+
+// ===========================================
+// GET SINGLE SERVICE CALL
+// GET : /api/v1/servicecall/:id
+// ===========================================
+
+router.get(
+  "/:id",
+  getServiceCallById
+);
+
+// ===========================================
+// UPDATE SERVICE CALL
+// PUT : /api/v1/servicecall/:id
+// ===========================================
+
+router.put(
+  "/:id",
+  updateServiceCall
+);
+
+// ===========================================
+// DELETE SERVICE CALL
+// DELETE : /api/v1/servicecall/:id
+// ===========================================
+
+router.delete(
+  "/:id",
+  deleteServiceCall
+);
 
 module.exports = router;

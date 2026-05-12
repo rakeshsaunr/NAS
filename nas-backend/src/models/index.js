@@ -6,6 +6,9 @@ const OTPModel = require('./otp-model');
 const StatsModel = require('./stats-model');
 const CallslipModel = require('./callslip-model');
 const ServicecallModel = require('./servicecall-model');
+const CategoryModel = require('./category-model');
+const DepartmentModel = require('./department-model');
+const CustomerModel = require('./customer-model');
 
 module.exports = {
   UserModel,
@@ -16,4 +19,7 @@ module.exports = {
   StatsModel,
   CallslipModel,
   ServicecallModel,
+  CategoryModel,
+  DepartmentModel,
+  CustomerModel,
 };

@@ -2,46 +2,113 @@ const mongoose = require("mongoose");
 
 const callSlipSchema = new mongoose.Schema(
   {
-    customerName: String,
-    department: String,
-    companyName: String,
-    contactNumber: String,
-    email: String,
-    address: String,
+    // ================= CUSTOMER DETAILS =================
 
-    callNumber: String,
-    callDate: String,
-    callTime: String,
+    customerName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    companyName: {
+      type: String,
+      trim: true,
+    },
+
+    contactNumber: {
+      type: String,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+
+    address: {
+      type: String,
+      trim: true,
+    },
+
+    // ================= DYNAMIC DEPARTMENT =================
+
+    department: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+      required: true,
+    },
+
+    // ================= DYNAMIC CATEGORY =================
+
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
+
+    // ================= CALL DETAILS =================
+
+    callNumber: {
+      type: String,
+      trim: true,
+      unique: true,
+    },
+
+    callDate: {
+      type: Date,
+      default: Date.now,
+    },
+
+    callTime: {
+      type: String,
+      trim: true,
+    },
+
+    // ================= CALL TYPE =================
 
     callType: {
-      projectWork: Boolean,
-      installation: Boolean,
-      maintenance: Boolean,
-      amcVisit: Boolean,
-      serviceCall: Boolean,
-      siteSurvey: Boolean,
+      type: String,
+      enum: [
+        "Project Work",
+        "Installation",
+        "Maintenance",
+        "AMC Visit",
+        "Service Call",
+        "Site Survey",
+      ],
     },
 
-    charges: {
-      serviceCharges: Number,
-      totalAmount: Number,
-      paymentMode: String,
-      paymentStatus: String,
+    // ================= DYNAMIC PRODUCT TYPE =================
+
+    productType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
     },
 
-    products: {
-      cctv: Boolean,
-      biometric: Boolean,
-      networking: Boolean,
-      security: Boolean,
-      epabx: Boolean,
-      automation: Boolean,
+    // ================= COMPLAINT DETAILS =================
+
+    complaintType: {
+      type: String,
+      trim: true,
     },
 
-    complaintType: String,
-    problemDescription: String,
-    serviceDetails: String,
-    errorDetails: String,
+    problemDescription: {
+      type: String,
+      trim: true,
+    },
+
+    serviceDetails: {
+      type: String,
+      trim: true,
+    },
+
+    errorDetails: {
+      type: String,
+      trim: true,
+    },
+
+    // ================= PRIORITY =================
 
     priorityLevel: {
       type: String,
@@ -49,11 +116,82 @@ const callSlipSchema = new mongoose.Schema(
       default: "Low",
     },
 
-    loggedBy: String,
+    // ================= PAYMENT DETAILS =================
+
+    charges: {
+      serviceCharges: {
+        type: Number,
+        default: 0,
+      },
+
+      totalAmount: {
+        type: Number,
+        default: 0,
+      },
+
+      paymentMode: {
+        type: String,
+        enum: [
+          "Cash",
+          "UPI",
+          "Card",
+          "Bank Transfer",
+          "Cheque",
+        ],
+      },
+
+      paymentStatus: {
+        type: String,
+        enum: ["Pending", "Paid"],
+        default: "Pending",
+      },
+    },
+
+    // ================= SERVICE STATUS =================
+
+    serviceStatus: {
+      type: String,
+      enum: [
+        "Pending",
+        "In Progress",
+        "Completed",
+        "Cancelled",
+      ],
+      default: "Pending",
+    },
+
+    // ================= ASSIGNED ENGINEER =================
+
+    assignedEngineer: {
+      type: String,
+      trim: true,
+    },
+
+    // ================= LOG DETAILS =================
+
+    loggedBy: {
+      type: String,
+      trim: true,
+    },
+
+    remarks: {
+      type: String,
+      trim: true,
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-module.exports = mongoose.model("CallSlip", callSlipSchema);
+const CallSlip = mongoose.model(
+  "CallSlip",
+  callSlipSchema
+);
+
+module.exports = CallSlip;

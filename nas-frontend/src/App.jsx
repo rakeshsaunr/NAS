@@ -28,6 +28,10 @@ import Settings from "./components/pages/dashboard/Settings";
 import Users from "./components/pages/dashboard/Users";
 import Blogs from "./components/pages/dashboard/Blogs";
 import Project from "./components/pages/dashboard/Project";
+import Category from "./components/pages/dashboard/Category"; // category import
+import Department from "./components/pages/dashboard/Department"; // department import
+// Customer import
+import Customer from "./components/pages/dashboard/Customer";
 // Correct ServiceCall import for "/dashboard/service-call"
 import ServiceCall from "./components/pages/dashboard/ServiceCall";
 import CallSlip from "./components/pages/dashboard/CallSlip";
@@ -127,6 +131,16 @@ function AppContent() {
           }
         />
         <Route
+          path="/dashboard/customer"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Customer />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/dashboard/blogs"
           element={
             <ProtectedRoute>
@@ -142,6 +156,26 @@ function AppContent() {
             <ProtectedRoute>
               <DashboardLayout>
                 <Project />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/category"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Category />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/department"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <Department />
               </DashboardLayout>
             </ProtectedRoute>
           }

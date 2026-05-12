@@ -1,4 +1,4 @@
-const Project = require('../models/Project-model');
+const Project = require('../models/project-model');
 
 class ProjectRepository {
   // Create new project

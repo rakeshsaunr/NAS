@@ -1,124 +1,229 @@
-const ServiceCall = require('../models/servicecall-model');
+const ServiceCall = require(
+  "../models/servicecall-model"
+);
 
-// GET all Service Calls
-const getAllServiceCalls = async (req, res) => {
+// ===========================================
+// GET ALL SERVICE CALLS
+// ===========================================
+
+const getAllServiceCalls = async (
+  req,
+  res
+) => {
   try {
-    const serviceCalls = await ServiceCall.find().sort({ createdAt: -1 });
+    const serviceCalls =
+      await ServiceCall.find({
+        isActive: true,
+      })
+        .populate(
+          "department",
+          "name"
+        )
+        .populate(
+          "category",
+          "name"
+        )
+        .populate(
+          "productType",
+          "name"
+        )
+        .sort({ createdAt: -1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: serviceCalls
+      count: serviceCalls.length,
+      data: serviceCalls,
     });
-
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Error fetching service calls",
-      error: error.message
+      message:
+        error.message ||
+        "Error Fetching Service Calls",
     });
   }
 };
 
-// GET single Service Call by ID
-const getServiceCallById = async (req, res) => {
+// ===========================================
+// GET SINGLE SERVICE CALL
+// ===========================================
+
+const getServiceCallById = async (
+  req,
+  res
+) => {
   try {
-    const serviceCall = await ServiceCall.findById(req.params.id);
+    const serviceCall =
+      await ServiceCall.findById(
+        req.params.id
+      )
+        .populate(
+          "department",
+          "name"
+        )
+        .populate(
+          "category",
+          "name"
+        )
+        .populate(
+          "productType",
+          "name"
+        );
 
     if (!serviceCall) {
       return res.status(404).json({
         success: false,
-        message: "Service call not found"
+        message:
+          "Service Call Not Found",
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: serviceCall
+      data: serviceCall,
     });
-
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Error fetching service call",
-      error: error.message
+      message:
+        error.message ||
+        "Error Fetching Service Call",
     });
   }
 };
 
-// CREATE new Service Call
-const createServiceCall = async (req, res) => {
+// ===========================================
+// CREATE SERVICE CALL
+// ===========================================
+
+const createServiceCall = async (
+  req,
+  res
+) => {
   try {
-    const newServiceCall = await ServiceCall.create(req.body);
+    // ================= AUTO CALL NUMBER =================
 
-    res.status(201).json({
-      success: true,
-      data: newServiceCall
-    });
-
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: "Error creating service call",
-      error: error.message
-    });
-  }
-};
-
-// UPDATE Service Call
-const updateServiceCall = async (req, res) => {
-  try {
-    const updatedServiceCall = await ServiceCall.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true
-      }
+    const randomNumber = Math.floor(
+      1000 + Math.random() * 9000
     );
+
+    req.body.callNumber = `SC-${randomNumber}`;
+
+    const newServiceCall =
+      await ServiceCall.create(
+        req.body
+      );
+
+    return res.status(201).json({
+      success: true,
+      message:
+        "Service Call Created Successfully",
+      data: newServiceCall,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message:
+        error.message ||
+        "Error Creating Service Call",
+    });
+  }
+};
+
+// ===========================================
+// UPDATE SERVICE CALL
+// ===========================================
+
+const updateServiceCall = async (
+  req,
+  res
+) => {
+  try {
+    const updatedServiceCall =
+      await ServiceCall.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      )
+        .populate(
+          "department",
+          "name"
+        )
+        .populate(
+          "category",
+          "name"
+        )
+        .populate(
+          "productType",
+          "name"
+        );
 
     if (!updatedServiceCall) {
       return res.status(404).json({
         success: false,
-        message: "Service call not found"
+        message:
+          "Service Call Not Found",
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      data: updatedServiceCall
+      message:
+        "Service Call Updated Successfully",
+      data: updatedServiceCall,
     });
-
   } catch (error) {
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
-      message: "Error updating service call",
-      error: error.message
+      message:
+        error.message ||
+        "Error Updating Service Call",
     });
   }
 };
 
-// DELETE Service Call
-const deleteServiceCall = async (req, res) => {
+// ===========================================
+// DELETE SERVICE CALL
+// ===========================================
+
+const deleteServiceCall = async (
+  req,
+  res
+) => {
   try {
-    const deletedServiceCall = await ServiceCall.findByIdAndDelete(req.params.id);
+    const deletedServiceCall =
+      await ServiceCall.findByIdAndUpdate(
+        req.params.id,
+        {
+          isActive: false,
+        },
+        {
+          new: true,
+        }
+      );
 
     if (!deletedServiceCall) {
       return res.status(404).json({
         success: false,
-        message: "Service call not found"
+        message:
+          "Service Call Not Found",
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      message: "Service call deleted successfully"
+      message:
+        "Service Call Deleted Successfully",
     });
-
   } catch (error) {
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Error deleting service call",
-      error: error.message
+      message:
+        error.message ||
+        "Error Deleting Service Call",
     });
   }
 };
@@ -128,5 +233,5 @@ module.exports = {
   getServiceCallById,
   createServiceCall,
   updateServiceCall,
-  deleteServiceCall
+  deleteServiceCall,
 };
