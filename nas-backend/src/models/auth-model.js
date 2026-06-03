@@ -1,36 +1,94 @@
 // backend/models/auth-model.js
+
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, trim: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: {
+    // ✅ NAME
+    name: {
       type: String,
-      enum: ["admin", "manager", "staff", "customer", "user"],
-      default: "user",
+      required: true,
+      trim: true,
     },
 
-    // Password reset
-    resetOtp: { type: String },
-    resetOtpExpires: { type: Date },
+    // ✅ EMAIL
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
 
-    /* ---------------- 2FA fields ----------------
-     * twoFactorSecret      - final Base32 secret (stored after user verifies)
-     * tempTwoFactorSecret  - temporary secret during setup (used for email-flow)
-     * twoFactorEnabled     - boolean flag when 2FA is enabled for account
-     * recoveryCodes        - array of hashed recovery codes (sha256)
-     */
-    twoFactorSecret: { type: String, default: null },
-    tempTwoFactorSecret: { type: String, default: null },
-    twoFactorEnabled: { type: Boolean, default: false },
-    recoveryCodes: { type: [String], default: [] },
+    // ✅ PASSWORD
+    password: {
+      type: String,
+      required: true,
+      select: false,
+    },
 
-    // any other helper fields can go here
+    // ✅ ROLE
+    role: {
+      type: String,
+      enum: [
+        "Admin",
+        "Owner",
+        "Staff",
+        "Accountant",
+      ],
+      default: "Staff",
+    },
+
+    // ✅ PASSWORD RESET
+    resetOtp: {
+      type: String,
+      default: null,
+    },
+
+    resetOtpExpires: {
+      type: Date,
+      default: null,
+    },
+
+    // ✅ 2FA SECRET
+    twoFactorSecret: {
+      type: String,
+      default: null,
+    },
+
+    // ✅ TEMP SECRET
+    tempTwoFactorSecret: {
+      type: String,
+      default: null,
+    },
+
+    // ✅ 2FA STATUS
+    twoFactorEnabled: {
+      type: Boolean,
+      default: false,
+    },
+
+    // ✅ RECOVERY CODES
+    recoveryCodes: {
+      type: [String],
+      default: [],
+    },
+
+    // ✅ ACCOUNT STATUS
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-
-module.exports = mongoose.model("User", userSchema);
+// ✅ PREVENT OVERWRITE MODEL ERROR
+module.exports =
+  mongoose.models.User ||
+  mongoose.model(
+    "User",
+    userSchema
+  );

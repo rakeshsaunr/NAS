@@ -22,7 +22,7 @@ const app = express();
 
 // CORS middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://www.rakeshsaunr.in','https://portfolio-frontend-a7e.pages.dev'],
+  origin: ['http://localhost:5173','https://nas-frontend.pages.dev/'],
   credentials: true,
 }));
 

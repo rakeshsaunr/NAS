@@ -5,19 +5,56 @@ import {
   FaFolderOpen,
   FaRegNewspaper,
   FaBriefcase,
-  FaUserAlt, // Customer icon
+  FaUserAlt,
+  FaFileInvoiceDollar,
+  FaFileSignature,
+  FaMoneyCheckAlt,
+  FaUserPlus,
+  FaTools,
+  FaBalanceScale,
+  FaRegCheckCircle,
+  FaUsers, // Employee Master
+  FaUserFriends, // Add Customer Master icon
+  FaLayerGroup, // Use for Master Management (or use another suitable icon)
+  FaServicestack, // Service icon (added for All Service)
 } from "react-icons/fa";
 import { HiOutlineMenuAlt1 } from "react-icons/hi";
 import { RiStickyNote2Line } from "react-icons/ri";
-import { MdCategory } from "react-icons/md";
-import { MdApartment } from "react-icons/md";
+import {
+  MdCategory,
+  MdApartment,
+  MdOutlineCategory,
+  MdOutlineMarkEmailUnread,
+  MdOutlinePersonSearch,
+  MdOutlineEngineering,
+  MdAssignmentTurnedIn,
+  MdDeviceHub,
+  MdTimelapse,
+  MdOutlineWorkspaces,
+  MdOutlineContactSupport,
+} from "react-icons/md";
+import { TbFileInvoice } from "react-icons/tb";
+import { GiReceiveMoney, GiPayMoney } from "react-icons/gi";
 
-/**
- * Hamburger icon (HiOutlineMenuAlt1) with gradient color like close icon, but now in red
- */
+// --- Add Master Management entry, All Mkt Work, Daily Calls Sheet, and All Service ---
+const menuItems = [
+  { to: "/dashboard", label: "Dashboard", icon: <RxDashboard className="inline-block text-lg text-red-600" /> },
+
+  // Master Management
+  { to: "/dashboard/master-management", label: "All Master", icon: <FaLayerGroup className="inline-block text-lg text-red-600" /> },
+
+  // All Service
+  { to: "/dashboard/all-service", label: "All Service", icon: <FaServicestack className="inline-block text-lg text-red-600" /> },
+
+  // All Market Work
+  { to: "/dashboard/all-mkt-work", label: "All Market Work", icon: <MdOutlineWorkspaces className="inline-block text-lg text-red-600" /> },
+
+  // Miscellaneous (using RiStickyNote2Line for a different icon for Misc)
+  { to: "/dashboard/misc", label: "Misc", icon: <RiStickyNote2Line className="inline-block text-lg text-red-600" /> },
+];
+
 function AnimatedHamburgerSidebar({ onClick, show }) {
   if (!show) return null;
-
   return (
     <button
       onClick={onClick}
@@ -103,19 +140,6 @@ function AnimatedCloseSidebar({ onClick, show }) {
   );
 }
 
-// Add a Customer menu item using FaUserAlt icon
-const menuItems = [
-  { to: "/dashboard", label: "Dashboard", icon: <RxDashboard className="inline-block text-lg text-red-600" /> },
-  { to: "/dashboard/project", label: "Products", icon: <FaFolderOpen className="inline-block text-lg text-red-600" /> },
-  { to: "/dashboard/category", label: "Category", icon: <MdCategory className="inline-block text-lg text-red-600" /> },
-  { to: "/dashboard/department", label: "Department", icon: <MdApartment className="inline-block text-lg text-red-600" /> },
-  { to: "/dashboard/customer", label: "Customer", icon: <FaUserAlt className="inline-block text-lg text-red-600" /> }, // Customer menu item added
-  { to: "/dashboard/service-call", label: "Services Call", icon: <FaBriefcase className="inline-block text-lg text-red-600" /> },
-  // Removed Users menu item
-  { to: "/dashboard/callslip", label: "Call Generation Slip", icon: <RiStickyNote2Line className="inline-block text-lg text-red-600" /> },
-  { to: "/dashboard/blogs", label: "Blog", icon: <FaRegNewspaper className="inline-block text-lg text-red-600" /> },
-];
-
 export default function Sidebar() {
   const [open, setOpen] = useState(typeof window !== "undefined" ? window.innerWidth >= 768 : true);
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
@@ -158,9 +182,9 @@ export default function Sidebar() {
           left: 0,
         }}
       >
-        <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between px-4 py-1 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Logo" className="h-8 w-auto md:block" />
+            <img src="/logo.png" alt="Logo" className="h-15 w-auto md:block" />
           </div>
 
           {isMobile && (
@@ -196,7 +220,7 @@ export default function Sidebar() {
 
       {isMobile && open && (
         <div
-          className="fixed inset-0 bg-transparent bg-opacity-40 backdrop-blur-[2px] z-40 md:hidden transition-opacity"
+          className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-[2px] z-40 md:hidden transition-opacity"
           onClick={() => setOpen(false)}
         />
       )}

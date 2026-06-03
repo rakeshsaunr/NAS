@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaInstagramSquare } from "react-icons/fa";
 
 const socialLinks = [
   {
@@ -11,16 +12,7 @@ const socialLinks = [
     ),
     className: "hover:bg-[#1877f2] text-[#1877f2] hover:text-white",
   },
-  {
-    href: "https://twitter.com/",
-    title: "Twitter",
-    svg: (
-      <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
-        <path d="M24 4.557a9.93 9.93 0 0 1-2.828.775 4.932 4.932 0 0 0 2.165-2.724c-.951.564-2.005.974-3.127 1.195A4.916 4.916 0 0 0 16.616 3c-2.717 0-4.92 2.206-4.92 4.92 0 .386.045.763.128 1.124C7.728 8.808 4.1 6.845 1.671 3.149a4.822 4.822 0 0 0-.666 2.475c0 1.708.869 3.216 2.188 4.099a4.904 4.904 0 0 1-2.229-.616c-.054 2.28 1.581 4.415 3.949 4.89a4.936 4.936 0 0 1-2.224.084c.631 1.965 2.445 3.396 4.6 3.435A9.872 9.872 0 0 1 0 21.543a13.94 13.94 0 0 0 7.548 2.212c9.057 0 14.009-7.513 14.009-14.009 0-.213-.004-.425-.014-.636A10.012 10.012 0 0 0 24 4.557z" />
-      </svg>
-    ),
-    className: "hover:bg-[#1da1f2] text-[#1da1f2] hover:text-white",
-  },
+  // Twitter icon removed
   {
     href: "https://www.linkedin.com/",
     title: "LinkedIn",
@@ -35,9 +27,7 @@ const socialLinks = [
     href: "https://www.instagram.com/",
     title: "Instagram",
     svg: (
-      <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
-        <path d="M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.8.31 4.07.59a5.94 5.94 0 0 0-2.1 1.36A5.94 5.94 0 0 0 .59 4.07C.31 4.8.13 5.78.07 7.05.01 8.33 0 8.74 0 12c0 3.26.01 3.67.07 4.95.06 1.27.24 2.25.52 2.98.31.84.74 1.55 1.36 2.1a5.94 5.94 0 0 0 2.1 1.36c.73.28 1.71.46 2.98.52 1.28.06 1.69.07 4.97.07s3.69-.01 4.97-.07c1.27-.06 2.25-.24 2.98-.52a5.94 5.94 0 0 0 2.1-1.36 5.94 5.94 0 0 0 1.36-2.1c.28-.73.46-1.71.52-2.98.06-1.28.07-1.69.07-4.97s-.01-3.69-.07-4.97c-.06-1.27-.24-2.25-.52-2.98a5.94 5.94 0 0 0-1.36-2.1A5.94 5.94 0 0 0 19.93.59c-.73-.28-1.71-.46-2.98-.52C15.67.01 15.26 0 12 0z" />
-      </svg>
+      <FaInstagramSquare size={24} />
     ),
     className:
       "hover:bg-gradient-to-br from-pink-500 to-yellow-400 text-pink-500 hover:text-white",
@@ -132,7 +122,7 @@ const Contact = () => {
                 <div>
                   <p className="text-sm text-gray-500">Call Us</p>
                   <h4 className="font-bold text-gray-800">
-                    +91 12345 67890
+                    +91 95225 95887
                   </h4>
                 </div>
               </div>

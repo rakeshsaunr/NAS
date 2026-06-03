@@ -1,173 +1,156 @@
-import React, { useState } from 'react';
+// No need for explicit import React for function components (React 17+).
 import {
-  Globe,
-  Award,
-  Users,
-  ShieldCheck,
-  Building2,
+  Briefcase,
+  Factory,
   GraduationCap,
-  BriefcaseBusiness,
   Hospital,
-  ShoppingCart,
-  Banknote,
-  Home,
-  Warehouse,
-  Bus,
-  Cable,
 } from "lucide-react";
 
-// Simple data for industry verticals
-const industries = [
-  {
-    title: "Retail & Shopping Malls",
-    desc: "Transform retail security and shopper experiences with robust surveillance and automation solutions.",
-    icon: ShoppingCart,
-    badge: "POPULAR",
-  },
-  {
-    title: "Education (Schools/Colleges)",
-    desc: "Ensure campus safety and operational efficiency for students and staff.",
-    icon: GraduationCap,
-    badge: "",
-  },
-  {
-    title: "Healthcare & Hospitals",
-    desc: "Safeguard patients, staff, and critical areas of healthcare facilities.",
-    icon: Hospital,
-    badge: "RECOMMENDED",
-  },
-  {
-    title: "Banking & Finance",
-    desc: "Enhance security and compliance across banks and ATMs with advanced solutions.",
-    icon: Banknote,
-    badge: "",
-  },
+// Industry feature cards (with icon, tag, etc.)
+const industryFeatures = [
   {
     title: "Corporate Offices",
-    desc: "Modernize office security, access, and environment control for businesses.",
-    icon: BriefcaseBusiness,
-    badge: "",
+    icon: <Briefcase size={44} strokeWidth={2.2} className="text-blue-500" />,
+    color: "from-blue-100 to-cyan-100",
+    description:
+      "Robust access control, CCTV, and automation solutions for secure, modern workplaces—improve productivity and safety.",
+    tag: "Workspaces",
+    tagColor: "bg-blue-500 text-white",
   },
   {
-    title: "Residential Societies",
-    desc: "Protect gated communities and homes with integrated security and networking.",
-    icon: Home,
-    badge: "",
+    title: "Manufacturing & Warehouses",
+    icon: <Factory size={44} strokeWidth={2.2} className="text-orange-500" />,
+    color: "from-orange-100 to-yellow-100",
+    description:
+      "Track movement, safeguard assets, and monitor operations 24/7 with advanced surveillance and biometric systems.",
+    tag: "Industrial",
+    tagColor: "bg-orange-500 text-white",
   },
   {
-    title: "Warehouses & Logistics",
-    desc: "Monitor inventory and logistics for smooth supply chain management.",
-    icon: Warehouse,
-    badge: "",
+    title: "Education & Institutions",
+    icon: <GraduationCap size={44} strokeWidth={2.2} className="text-green-500" />,
+    color: "from-green-100 to-lime-100",
+    description:
+      "Control visitor entry, protect students & staff, and automate administrative efficiency for schools, colleges, and more.",
+    tag: "Campus",
+    tagColor: "bg-green-500 text-white",
   },
   {
-    title: "Hospitality (Hotels, Resorts)",
-    desc: "Offer guests a safe and smart stay by deploying advanced technology.",
-    icon: Building2,
-    badge: "",
-  },
-  {
-    title: "Transport & Bus Stations",
-    desc: "Elevate passenger safety and monitor transit corridors with ease.",
-    icon: Bus,
-    badge: "",
-  },
-  {
-    title: "Factories & Industries",
-    desc: "Secure critical assets and enable automation on factory floors.",
-    icon: Cable,
-    badge: "",
+    title: "Healthcare Facilities",
+    icon: <Hospital size={44} strokeWidth={2.2} className="text-pink-500" />,
+    color: "from-pink-100 to-purple-100",
+    description:
+      "Safeguard sensitive areas, enable contactless access, and ensure compliance in hospitals, clinics, and labs.",
+    tag: "Health & Safety",
+    tagColor: "bg-pink-500 text-white",
   },
 ];
 
-function IndustryCard({ title, desc, icon: Icon, badge }) {
+const Industries = () => {
   return (
-    <div className="bg-white border border-gray-100 hover:border-blue-300 shadow-sm hover:shadow-lg transition-all p-4 rounded flex flex-col items-center text-center max-w-xs w-full mx-auto group relative h-full">
-      {badge && (
-        <span className="absolute top-2 left-2 bg-orange-600 text-white text-[9px] px-2 py-0.5 rounded uppercase font-bold">{badge}</span>
-      )}
-      <div className="mb-4 mt-2 text-blue-700 group-hover:text-blue-900 transition-colors">
-        <Icon size={36} />
-      </div>
-      <h3 className="font-bold text-md mb-2 text-gray-800 group-hover:text-blue-900 transition-colors">{title}</h3>
-      <p className="text-xs text-gray-500">{desc}</p>
-    </div>
-  );
-}
-
-export default function Industries() {
-  const [search, setSearch] = useState("");
-
-  // Simple search filter
-  const filteredIndustries = industries.filter(
-    (ind) =>
-      ind.title.toLowerCase().includes(search.toLowerCase()) ||
-      ind.desc.toLowerCase().includes(search.toLowerCase())
-  );
-
-  return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-900 pb-20">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500 text-white py-10 px-4 text-center border-b-4 border-orange-400">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl md:text-4xl font-bold mb-2">Industry Solutions</h1>
-          <p className="text-blue-100 text-xs md:text-base max-w-2xl mx-auto">
-            Customized IT, Security, and Automation for every Industry. Empower your business or institution
-            with reliable, scalable technology – delivered by Network Automation Solutions.
+    <section className="bg-gradient-to-br from-white via-indigo-50 to-blue-100 min-h-screen">
+      {/* Header / Banner */}
+      <div className="max-w-6xl mx-auto rounded-3xl p-6">
+        <header className="mb-10 flex flex-col items-center text-center">
+          <span className="inline-block px-4 py-0 rounded-full bg-indigo-100 text-indigo-600 text-sm mb-2 font-semibold tracking-wide uppercase">
+            Industries
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 mb-4 tracking-tight">
+            Industries We Serve
+          </h1>
+          <p className="text-xl text-gray-700 mx-auto max-w-3xl">
+            Future-proof security, connectivity, and automation—trusted by India's top organizations across verticals.
+            <span className="text-indigo-600 font-bold"> Customized for your sector.</span>
           </p>
-        </div>
-      </div>
+        </header>
 
-      <main className="max-w-7xl mx-auto px-3 py-8">
-        <div className="mb-8 flex flex-col md:flex-row items-center gap-4 justify-between">
-          <div className="font-bold text-gray-800 text-md">
-            {filteredIndustries.length} Industry Verticals
-          </div>
-          <div>
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search Industry (e.g. Retail, Hospital)..."
-              className="border border-gray-200 rounded px-3 py-1 text-xs outline-none focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        {/* Industries Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
-          {filteredIndustries.map((item, idx) => (
-            <IndustryCard key={idx} {...item} />
-          ))}
-        </div>
-
-        {/* Can't find? */}
-        <div className="mt-12 text-center">
-          <span className="inline-block bg-blue-50 text-blue-900 px-4 py-2 text-xs rounded font-bold">Didn't find your industry?</span>
-          <p className="mt-2 text-xs text-gray-500 mb-3">
-            We're happy to create tailor-made solutions for any business, institution, or organization in India.
-          </p>
-          <button className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white px-6 py-2 rounded-full font-bold uppercase text-xs hover:from-orange-500 hover:via-red-400 hover:to-red-600 transition-all">Contact Our Experts</button>
-        </div>
-      </main>
-
-      {/* Trust Badges */}
-      <section className="bg-white border-y py-8 mt-8">
-        <div className="max-w-7xl mx-auto px-3 grid grid-cols-2 md:grid-cols-4 gap-5">
-          {[
-            { title: "Pan India Delivery", sub: "Fast & Secure shipping", icon: Globe },
-            { title: "100% Genuine", sub: "Original Brand Warranty", icon: ShieldCheck },
-            { title: "Expert Support", sub: "24/7 Technical assistance", icon: Users },
-            { title: "Safe Payments", sub: "Fully encrypted checkout", icon: Award }
-          ].map((item, idx) => (
-            <div key={idx} className="flex flex-col items-center text-center">
-              <div className="mb-3 text-blue-900"><item.icon size={22} /></div>
-              <h4 className="font-bold text-xs uppercase mb-1">{item.title}</h4>
-              <p className="text-[9px] text-gray-500 uppercase tracking-widest">{item.sub}</p>
+        {/* Industry Feature Cards */}
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          {industryFeatures.map((feature) => (
+            <div
+              key={feature.title}
+              className={`group bg-gradient-to-br ${feature.color} rounded-2xl p-6 flex flex-col items-center text-center hover:scale-105 transition hover:shadow-xl duration-200 flex-1 relative border border-gray-100`}
+            >
+              {/* Tag */}
+              <span className={`absolute right-4 top-4 text-xs px-3 py-1 rounded-full font-semibold ${feature.tagColor} z-10`}>
+                {feature.tag}
+              </span>
+              {/* Icon */}
+              <div className="rounded-full w-20 h-20 flex items-center justify-center mb-4 bg-white/70 shadow group-hover:scale-110 transition-transform duration-150">
+                {feature.icon}
+              </div>
+              {/* Title */}
+              <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-indigo-700 transition-colors">
+                {feature.title}
+              </h2>
+              {/* Description */}
+              <p className="text-gray-600 text-sm">{feature.description}</p>
             </div>
           ))}
         </div>
-      </section>
-    </div>
+
+        {/* Why Choose Section */}
+        <div className="mt-16 flex flex-col md:flex-row md:items-center md:justify-between gap-10 py-10">
+          <div className="flex-1 bg-gradient-to-br from-indigo-200/60 to-white rounded-2xl p-8 flex flex-col shadow">
+            <h3 className="font-black text-2xl text-indigo-800 mb-4 flex items-center gap-2">
+              <span>Why Choose Our Solutions?</span>
+              <svg className="w-6 h-6 text-indigo-300" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+                <path d="M12 20v-6m0 0v-2a2 2 0 1 1 4 0v8a2 2 0 1 1-4 0z" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </h3>
+            <ul className="list-none space-y-4 text-lg text-gray-800 pt-2">
+              <li className="flex items-start gap-2">
+                <span className="text-indigo-500 mt-1 font-bold">✓</span>
+                Proven in diverse, demanding environments
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-indigo-500 mt-1 font-bold">✓</span>
+                Comprehensive—access, CCTV, alarms, automation, and more
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-indigo-500 mt-1 font-bold">✓</span>
+                Scalable—adaptable for single sites or enterprise-wide
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-indigo-500 mt-1 font-bold">✓</span>
+                Seamless integration with legacy & new technologies
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-indigo-500 mt-1 font-bold">✓</span>
+                Turnkey support—from planning to maintenance
+              </li>
+            </ul>
+          </div>
+          {/* Illustration */}
+          <div className="flex-1 flex items-center justify-center">
+            <img
+              src="/images/industries/industries-illustration.png"
+              alt="Industries Illustration"
+              className="max-w-xs md:max-w-sm w-full"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </div>
+      {/* Soft Animation from BiometricSystems (for consistency, optional) */}
+      <style>{`
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 18s linear infinite;
+        }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      `}</style>
+    </section>
   );
-}
+};
+
+export default Industries;

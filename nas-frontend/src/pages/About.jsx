@@ -93,10 +93,25 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
-
       {/* HERO */}
-      <section className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white">
-        <div className="max-w-6xl mx-auto px-6 py-20 md:py-28">
+      <section className="relative overflow-hidden text-white">
+        {/* Video Background */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+            style={{ filter: "none" }} // Ensure no blur or darkening, for clear video
+            poster="/video-poster.jpg"
+          >
+            <source src="https://res.cloudinary.com/dz4zdzuaj/video/upload/q_auto/f_auto/v1779277578/cctv_nas_video_korjqw.mp4" type="video/mp4" />
+            {/* fallback */}
+          </video>
+        </div>
+        {/* Content */}
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-20 md:py-28">
           <p className="text-xs tracking-widest uppercase text-red-100 mb-5">About Us</p>
           <h1 className="text-4xl md:text-6xl font-bold leading-tight max-w-2xl mb-5">
             Smart. Secure.<br />
@@ -119,7 +134,6 @@ export default function AboutPage() {
       </section>
 
       <div className="max-w-6xl mx-auto px-6">
-
         {/* WHO WE ARE */}
         <section className="py-16 border-b border-gray-100">
           <p className="text-xs tracking-widest uppercase text-gray-400 mb-8">Company Overview</p>
@@ -135,7 +149,7 @@ export default function AboutPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: "Installations completed", val: "1000+" },
+                { label: "Installations completed", val: "4000+" },
                 { label: "Years of experience", val: "30+" },
                 { label: "Cities we serve", val: "5" },
                 { label: "24×7 support", val: "Always" },
@@ -166,7 +180,7 @@ export default function AboutPage() {
               Network Automation Solutions was founded with a vision to provide reliable, smart, and advanced security and automation solutions for modern homes and businesses. With <span className="font-semibold text-gray-700">30+ years of industry experience</span> in IT infrastructure, surveillance systems, and networking technologies, he has successfully built the company into a trusted service provider across Indore and nearby regions.
             </p>
             <p className="text-gray-500 leading-relaxed">
-              Under his leadership, the company has completed 1000+ successful installations and continues to deliver high-quality, customized solutions tailored to every client's needs.
+              Under his leadership, the company has completed 4000+ successful installations and continues to deliver high-quality, customized solutions tailored to every client's needs.
             </p>
             <div className="flex flex-wrap gap-2 mt-6">
               {founderTags.map((tag) => (
@@ -295,7 +309,6 @@ export default function AboutPage() {
         </section>
 
       </div>
-
     </div>
   );
 }

@@ -18,7 +18,7 @@ const auroraGradient = {
 
 // Example jungle background image (replace the URL as needed)
 const jungleBackgroundUrl =
-  "https://images.unsplash.com/photo-1506744038136-46273834b3fb?fit=crop&w=1500&q=80";
+  "https://res.cloudinary.com/dz4zdzuaj/image/upload/q_auto/f_auto/v1779083115/bg2_vytmuk.jpg";
 
 // SVG icons for input fields
 const EmailIcon = () => (

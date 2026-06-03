@@ -85,7 +85,7 @@ function authorizeRole(role) {
 module.exports = {
   auth,
   isAdmin: authorizeRole("admin"),
-  isManager: authorizeRole("manager"),
+  isManager: authorizeRole("owner"),
   isStaff: authorizeRole("staff"),
-  isCustomer: authorizeRole("customer"),
+  isCustomer: authorizeRole("accountant"),
 };

@@ -1,85 +1,56 @@
-const repository = require("../repositories/department-repository");
+const {
+  createDepartment,
+  getAllDepartments,
+  getDepartmentById,
+  updateDepartmentById,
+  deleteDepartmentById,
+} = require(
+  "../repositories/department-repository"
+);
 
-// ================= CREATE =================
+// CREATE
+const createDepartmentService =
+  async (payload) => {
+    return await createDepartment(
+      payload
+    );
+  };
 
-const create = async (data) => {
-  if (!data || !data.name) {
-    throw new Error("Department Name is Required");
-  }
-  try {
-    const department = await repository.create(data);
-    return department;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
+// GET ALL
+const getAllDepartmentsService =
+  async () => {
+    return await getAllDepartments();
+  };
 
-// ================= GET ALL =================
+// GET SINGLE
+const getDepartmentByIdService =
+  async (id) => {
+    return await getDepartmentById(
+      id
+    );
+  };
 
-const getAll = async () => {
-  try {
-    const departments = await repository.getAll();
-    return departments;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
+// UPDATE
+const updateDepartmentByIdService =
+  async (id, payload) => {
+    return await updateDepartmentById(
+      id,
+      payload
+    );
+  };
 
-// ================= GET SINGLE =================
-
-const getById = async (id) => {
-  if (!id) {
-    throw new Error("ID is Required");
-  }
-  try {
-    const department = await repository.getById(id);
-    if (!department) {
-      throw new Error("Department Not Found");
-    }
-    return department;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-// ================= UPDATE =================
-
-const update = async (id, data) => {
-  if (!id) {
-    throw new Error("ID is Required");
-  }
-  try {
-    const updatedDepartment = await repository.update(id, data);
-    if (!updatedDepartment) {
-      throw new Error("Department Not Found");
-    }
-    return updatedDepartment;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-// ================= DELETE =================
-
-const remove = async (id) => {
-  if (!id) {
-    throw new Error("ID is Required");
-  }
-  try {
-    const deletedDepartment = await repository.remove(id);
-    if (!deletedDepartment) {
-      throw new Error("Department Not Found");
-    }
-    return deletedDepartment;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
+// DELETE
+const deleteDepartmentByIdService =
+  async (id) => {
+    return await deleteDepartmentById(
+      id
+    );
+  };
 
 module.exports = {
-  create,
-  getAll,
-  getById,
-  update,
-  remove,
+  createDepartmentService,
+  getAllDepartmentsService,
+  getDepartmentByIdService,
+  updateDepartmentByIdService,
+  deleteDepartmentByIdService,
 };

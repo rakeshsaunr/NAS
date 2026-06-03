@@ -1,277 +1,320 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+} from "lucide-react";
 
-// Department form popup as a separate component, declared outside of Department
-const DepartmentFormPopup = ({ open, onClose, form, onChange, onSubmit }) => {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-xl relative">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          type="button"
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl"
-          aria-label="Close popup"
-        >
-          &times;
-        </button>
-        <h2 className="text-xl font-bold mb-6">Create Department</h2>
-        <form onSubmit={onSubmit} className="grid md:grid-cols-2 gap-4">
-          {/* NAME */}
-          <input
-            type="text"
-            name="name"
-            placeholder="Department Name"
-            className="input"
-            value={form.name}
-            onChange={onChange}
-            required
-          />
-          {/* CODE */}
-          <input
-            type="text"
-            name="code"
-            placeholder="Department Code"
-            className="input"
-            value={form.code}
-            onChange={onChange}
-          />
-          {/* CONTACT PERSON */}
-          <input
-            type="text"
-            name="contactPerson"
-            placeholder="Contact Person"
-            className="input"
-            value={form.contactPerson}
-            onChange={onChange}
-          />
-          {/* CONTACT NUMBER */}
-          <input
-            type="text"
-            name="contactNumber"
-            placeholder="Contact Number"
-            className="input"
-            value={form.contactNumber}
-            onChange={onChange}
-          />
-          {/* EMAIL */}
-          <input
-            type="email"
-            name="email"
-            placeholder="Email Address"
-            className="input"
-            value={form.email}
-            onChange={onChange}
-          />
-          {/* STATUS */}
-          <select
-            name="status"
-            className="input"
-            value={form.status}
-            onChange={onChange}
-          >
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
-          {/* DESCRIPTION */}
-          <textarea
-            name="description"
-            placeholder="Department Description"
-            className="input md:col-span-2"
-            rows="3"
-            value={form.description}
-            onChange={onChange}
-          />
-          {/* CREATED BY */}
-          <input
-            type="text"
-            name="createdBy"
-            placeholder="Created By"
-            className="input"
-            value={form.createdBy}
-            onChange={onChange}
-          />
-          {/* REMARKS */}
-          <textarea
-            name="remarks"
-            placeholder="Remarks"
-            className="input md:col-span-2"
-            rows="3"
-            value={form.remarks}
-            onChange={onChange}
-          />
-          {/* BUTTON */}
-          <button
-            type="submit"
-            className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl md:col-span-2"
-          >
-            Save Department
-          </button>
-        </form>
-      </div>
-    </div>
-  );
+const API =
+  "http://localhost:5000/api/v1/department";
+
+const INITIAL_FORM = {
+  departmentName: "",
+  remark: "",
 };
 
-const API = "http://localhost:5000/api/v1/department";
+export default function Department() {
+  const [data, setData] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] =
+    useState(false);
 
-const Department = () => {
-  // ===========================================
-  // STATES
-  // ===========================================
-  const [departments, setDepartments] = useState([]);
+  const [editId, setEditId] =
+    useState(null);
 
-  const [form, setForm] = useState({
-    name: "",
-    code: "",
-    description: "",
-    contactPerson: "",
-    contactNumber: "",
-    email: "",
-    status: "Active",
-    createdBy: "",
-    remarks: "",
-  });
+  const [formData, setFormData] =
+    useState(INITIAL_FORM);
 
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
-
-  // ===========================================
-  // FETCH DEPARTMENTS (outside of render)
-  // ===========================================
-  useEffect(() => {
-    // Avoid calling setState directly on every render
-    axios.get(API)
-      .then(res => setDepartments(res.data.data))
-      .catch(error => { console.log(error); });
-  }, []);
-
-  // ===========================================
+  // =====================================
   // HANDLE CHANGE
-  // ===========================================
+  // =====================================
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  // ===========================================
-  // SUBMIT
-  // ===========================================
+  // =====================================
+  // FETCH DATA
+  // =====================================
+
+  const fetchDepartments =
+    async () => {
+      try {
+        const res = await axios.get(API);
+
+        setData(res.data.data || []);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+  useEffect(() => {
+    fetchDepartments();
+  }, []);
+
+  // =====================================
+  // CREATE / UPDATE
+  // =====================================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate name is not empty or only whitespace
-    if (!form.name.trim()) {
-      alert("Name is required");
-      return;
-    }
-
     try {
-      await axios.post(API, form);
-      setSuccessMsg("Department Created Successfully");
-      // Refresh departments list
-      const res = await axios.get(API);
-      setDepartments(res.data.data);
-      setForm({
-        name: "",
-        code: "",
-        description: "",
-        contactPerson: "",
-        contactNumber: "",
-        email: "",
-        status: "Active",
-        createdBy: "",
-        remarks: "",
-      });
-      setIsPopupOpen(false);
-      // Clear success after short delay
-      setTimeout(() => setSuccessMsg(""), 2000);
+      setLoading(true);
+
+      if (editId) {
+        await axios.put(
+          `${API}/${editId}`,
+          formData
+        );
+      } else {
+        await axios.post(
+          API,
+          formData
+        );
+      }
+
+      setOpen(false);
+      setEditId(null);
+
+      setFormData(INITIAL_FORM);
+
+      fetchDepartments();
     } catch (error) {
       console.log(error);
-      alert(
-        error.response?.data?.message ||
-          "Something went wrong"
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =====================================
+  // EDIT
+  // =====================================
+
+  const handleEdit = (item) => {
+    setEditId(item._id);
+
+    setFormData({
+      departmentName:
+        item.departmentName || "",
+      remark: item.remark || "",
+    });
+
+    setOpen(true);
+  };
+
+  // =====================================
+  // DELETE
+  // =====================================
+
+  const handleDelete = async (
+    id
+  ) => {
+    try {
+      await axios.delete(
+        `${API}/${id}`
       );
+
+      fetchDepartments();
+    } catch (error) {
+      console.log(error);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="p-5">
       {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Department Management</h1>
-        <p className="text-gray-500">
-          Create and manage departments
-        </p>
-      </div>
-      {/* Success notification */}
-      {successMsg && (
-        <div className="mb-6">
-          <div className="inline-block bg-green-100 text-green-800 px-4 py-2 rounded-lg shadow">{successMsg}</div>
-        </div>
-      )}
-      {/* CREATE BUTTON */}
-      <div className="mb-6">
+
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-3xl font-bold">
+          Department Master
+        </h1>
+
         <button
-          onClick={() => setIsPopupOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-6 rounded-xl"
+          onClick={() => {
+            setOpen(true);
+            setEditId(null);
+            setFormData(INITIAL_FORM);
+          }}
+          className="bg-black text-white px-4 py-2 rounded-lg flex items-center gap-2"
         >
-          + Add Department
+          <Plus size={18} />
+          Add Department
         </button>
       </div>
-      {/* Popup for Department Form */}
-      <DepartmentFormPopup
-        open={isPopupOpen}
-        onClose={() => setIsPopupOpen(false)}
-        form={form}
-        onChange={handleChange}
-        onSubmit={handleSubmit}
-      />
+
       {/* TABLE */}
-      <div className="bg-white rounded-2xl shadow mt-6 overflow-x-auto">
+
+      <div className="overflow-auto rounded-xl border">
         <table className="w-full">
           <thead className="bg-gray-100">
             <tr>
-              <th className="p-3 text-left">Name</th>
-              <th className="p-3 text-left">Code</th>
-              <th className="p-3 text-left">Contact Person</th>
-              <th className="p-3 text-left">Contact Number</th>
-              <th className="p-3 text-left">Status</th>
+              <th className="p-3 text-left">
+                Code
+              </th>
+
+              <th className="p-3 text-left">
+                Department Name
+              </th>
+
+              <th className="p-3 text-left">
+                Remark
+              </th>
+
+              <th className="p-3 text-center">
+                Action
+              </th>
             </tr>
           </thead>
+
           <tbody>
-            {departments.map((item) => (
-              <tr key={item._id} className="border-b">
-                <td className="p-3">{item.name}</td>
-                <td className="p-3">{item.code}</td>
-                <td className="p-3">{item.contactPerson}</td>
-                <td className="p-3">{item.contactNumber}</td>
-                <td className="p-3">{item.status}</td>
+            {data.map((item) => (
+              <tr
+                key={item._id}
+                className="border-t"
+              >
+                <td className="p-3">
+                  {
+                    item.departmentCode
+                  }
+                </td>
+
+                <td className="p-3">
+                  {
+                    item.departmentName
+                  }
+                </td>
+
+                <td className="p-3">
+                  {item.remark}
+                </td>
+
+                <td className="p-3">
+                  <div className="flex items-center justify-center gap-3">
+                    <button
+                      onClick={() =>
+                        handleEdit(item)
+                      }
+                      className="text-blue-600"
+                    >
+                      <Pencil
+                        size={18}
+                      />
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        handleDelete(
+                          item._id
+                        )
+                      }
+                      className="text-red-600"
+                    >
+                      <Trash2
+                        size={18}
+                      />
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
+
+            {data.length === 0 && (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="text-center p-5"
+                >
+                  No Data Found
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-      {/* STYLE */}
-      <style>{`
-        .input {
-          width: 100%;
-          border: 1px solid #d1d5db;
-          padding: 12px;
-          border-radius: 12px;
-          outline: none;
-        }
-        .input:focus {
-          border-color: #4f46e5;
-          box-shadow: 0 0 0 3px rgba(79,70,229,0.2);
-        }
-      `}</style>
+
+      {/* POPUP */}
+
+      {open && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-xl rounded-2xl p-6 relative">
+            {/* CLOSE */}
+
+            <button
+              onClick={() =>
+                setOpen(false)
+              }
+              className="absolute top-4 right-4"
+            >
+              <X />
+            </button>
+
+            <h2 className="text-2xl font-bold mb-5">
+              {editId
+                ? "Update Department"
+                : "Create Department"}
+            </h2>
+
+            <form
+              onSubmit={handleSubmit}
+            >
+              <div className="grid grid-cols-1 gap-4">
+                {/* DEPARTMENT NAME */}
+
+                <input
+                  type="text"
+                  name="departmentName"
+                  value={
+                    formData.departmentName
+                  }
+                  onChange={
+                    handleChange
+                  }
+                  placeholder="Department Name"
+                  className="border rounded-lg px-4 py-3"
+                  required
+                />
+
+                {/* REMARK */}
+
+                <textarea
+                  rows={4}
+                  name="remark"
+                  value={
+                    formData.remark
+                  }
+                  onChange={
+                    handleChange
+                  }
+                  placeholder="Remark"
+                  className="border rounded-lg px-4 py-3 resize-none"
+                />
+              </div>
+
+              {/* BUTTON */}
+
+              <div className="flex justify-end mt-5">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-black text-white px-6 py-3 rounded-lg"
+                >
+                  {loading
+                    ? "Saving..."
+                    : editId
+                    ? "Update"
+                    : "Save"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
-
-export default Department;
+}

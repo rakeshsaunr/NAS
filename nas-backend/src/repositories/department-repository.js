@@ -1,75 +1,57 @@
-const Department = require("../models/department-model");
+const Department = require(
+  "../models/department-model"
+);
 
-// ================= CREATE =================
-
-const create = async (data) => {
-  try {
-    const department = await Department.create(data);
-    return department;
-  } catch (error) {
-    throw new Error(error.message);
-  }
+// CREATE
+const createDepartment = async (
+  payload
+) => {
+  return await Department.create(
+    payload
+  );
 };
 
-// ================= GET ALL =================
+// GET ALL
+const getAllDepartments =
+  async () => {
+    return await Department.find({})
+      .sort({ createdAt: -1 })
+      .lean();
+  };
 
-const getAll = async () => {
-  try {
-    const departments = await Department.find({ isActive: true }).sort({ createdAt: -1 });
-    return departments;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
+// GET SINGLE
+const getDepartmentById =
+  async (id) => {
+    return await Department.findById(
+      id
+    ).lean();
+  };
 
-// ================= GET SINGLE =================
-
-const getById = async (id) => {
-  try {
-    const department = await Department.findById(id);
-    return department;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-// ================= UPDATE =================
-
-const update = async (id, data) => {
-  try {
-    const updatedDepartment = await Department.findByIdAndUpdate(
+// UPDATE
+const updateDepartmentById =
+  async (id, payload) => {
+    return await Department.findByIdAndUpdate(
       id,
-      data,
+      payload,
       {
         new: true,
         runValidators: true,
       }
-    );
-    return updatedDepartment;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
+    ).lean();
+  };
 
-// ================= DELETE =================
-
-const remove = async (id) => {
-  try {
-    const deletedDepartment = await Department.findByIdAndUpdate(
-      id,
-      { isActive: false },
-      { new: true }
+// DELETE
+const deleteDepartmentById =
+  async (id) => {
+    return await Department.findByIdAndDelete(
+      id
     );
-    return deletedDepartment;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
+  };
 
 module.exports = {
-  create,
-  getAll,
-  getById,
-  update,
-  remove,
+  createDepartment,
+  getAllDepartments,
+  getDepartmentById,
+  updateDepartmentById,
+  deleteDepartmentById,
 };

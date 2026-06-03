@@ -1,92 +1,209 @@
 const express = require('express');
+
 const router = express.Router();
 
 const { AuthController } = require('../../controllers');
-const { emailSchema, otpSchema } = require('../../validator/user-validation');
-const validate = require('../../middlewares/validate-middleware');
 
-// ✅ Safe async handler
+const {
+  emailSchema,
+  otpSchema,
+} = require('../../validator/user-validation');
+
+const validate = require(
+  '../../middlewares/validate-middleware'
+);
+
+const {
+  auth,
+} = require('../../middlewares/auth-middleware');
+
+// ✅ SAFE ASYNC HANDLER
 let asyncHandler;
+
 try {
-  asyncHandler = require('../../utils/async-handler');
+  asyncHandler = require(
+    '../../utils/async-handler'
+  );
 } catch (e) {
-  asyncHandler = (fn) => (req, res, next) =>
-    Promise.resolve(fn(req, res, next)).catch(next);
+  asyncHandler =
+    (fn) =>
+    (req, res, next) =>
+      Promise.resolve(
+        fn(req, res, next)
+      ).catch(next);
 }
 
-/**
- * ✅ Health check route
- * GET /api/v1/auth
- */
+/* -------------------------------------------------------------------------- */
+/* ✅ HEALTH CHECK                                                            */
+/* -------------------------------------------------------------------------- */
+
 router.get('/', (req, res) => {
-  res.json({ success: true, message: 'Auth route working fine 🚀' });
+  res.json({
+    success: true,
+    message:
+      'Auth route working fine 🚀',
+  });
 });
 
-/**
- * ✅ Send OTP
- */
+/* -------------------------------------------------------------------------- */
+/* ✅ SEND OTP                                                                */
+/* -------------------------------------------------------------------------- */
+
 router.post(
   '/send-otp',
   validate(emailSchema),
-  asyncHandler(AuthController.sendOTP)
+  asyncHandler(
+    AuthController.sendOTP
+  )
 );
 
-/**
- * ✅ Verify OTP (signup / login / forgot password)
- */
+/* -------------------------------------------------------------------------- */
+/* ✅ VERIFY OTP                                                              */
+/* -------------------------------------------------------------------------- */
+
 router.post(
   '/verify',
   validate(otpSchema),
-  asyncHandler(AuthController.checkSignUpOrLogin)
+  asyncHandler(
+    AuthController.checkSignUpOrLogin
+  )
 );
 
-/**
- * ✅ Password-based signup
- */
-router.post('/signup', asyncHandler(AuthController.signup));
-
-/**
- * ✅ Password-based login
- */
-if (AuthController.login) {
-  router.post('/login', asyncHandler(AuthController.login));
-}
-
-/**
- * ✅ Logout
- */
-router.post('/logout', asyncHandler(AuthController.logOut));
-
-/**
- * ✅ Set Password
- */
-router.post('/set-password', asyncHandler(AuthController.setPassword));
-
-/**
- * ✅ Change Password
- */
-router.post('/change-password', asyncHandler(AuthController.changePassword));
-
 /* -------------------------------------------------------------------------- */
-/* ✅  🔐 2FA (Google Authenticator) Routes - Now for Everyone!               */
+/* ✅ SIGNUP                                                                  */
 /* -------------------------------------------------------------------------- */
 
-/**
- * POST /api/v1/auth/2fa/enable
- * -> User scans QR code in Google Authenticator app
- */
-router.post('/2fa/enable', asyncHandler(AuthController.enable2FA));
+router.post(
+  '/signup',
+  asyncHandler(
+    AuthController.signup
+  )
+);
 
-/**
- * POST /api/v1/auth/2fa/verify
- * -> User enters 6-digit OTP to confirm 2FA setup
- */
-router.post('/2fa/verify', asyncHandler(AuthController.verify2FA));
+/* -------------------------------------------------------------------------- */
+/* ✅ GET USERS                                                               */
+/* -------------------------------------------------------------------------- */
 
-/**
- * POST /api/v1/auth/2fa/verify-login
- * -> User enters 6-digit OTP while logging in
- */
-router.post('/2fa/verify-login', asyncHandler(AuthController.verifyAdmin2FA)); // rename in controller for clarity if needed
+router.get(
+  '/users',
+  asyncHandler(
+    AuthController.getUsers
+  )
+);
+
+/* -------------------------------------------------------------------------- */
+/* ✅ DELETE USER                                                             */
+/* -------------------------------------------------------------------------- */
+
+router.delete(
+  '/users/:id',
+  asyncHandler(
+    AuthController.deleteUser
+  )
+);
+
+/* -------------------------------------------------------------------------- */
+/* ✅ CREATE USER (ADMIN / OWNER ONLY)                                        */
+/* -------------------------------------------------------------------------- */
+
+router.post(
+  '/create-user',
+  auth,
+  asyncHandler(
+    (req, res, next) => {
+      const role =
+        String(
+          req.user?.role || ''
+        ).toLowerCase();
+
+      // ✅ ONLY ADMIN & OWNER
+      if (
+        role !== 'admin' &&
+        role !== 'owner'
+      ) {
+        return res.status(403).json({
+          success: false,
+          message:
+            'Access Denied',
+        });
+      }
+
+      next();
+    }
+  ),
+  asyncHandler(
+    AuthController.createUser
+  )
+);
+
+/* -------------------------------------------------------------------------- */
+/* ✅ LOGIN                                                                   */
+/* -------------------------------------------------------------------------- */
+
+router.post(
+  '/login',
+  asyncHandler(
+    AuthController.login
+  )
+);
+
+/* -------------------------------------------------------------------------- */
+/* ✅ LOGOUT                                                                  */
+/* -------------------------------------------------------------------------- */
+
+router.post(
+  '/logout',
+  asyncHandler(
+    AuthController.logOut
+  )
+);
+
+/* -------------------------------------------------------------------------- */
+/* ✅ SET PASSWORD                                                            */
+/* -------------------------------------------------------------------------- */
+
+router.post(
+  '/set-password',
+  asyncHandler(
+    AuthController.setPassword
+  )
+);
+
+/* -------------------------------------------------------------------------- */
+/* ✅ CHANGE PASSWORD                                                         */
+/* -------------------------------------------------------------------------- */
+
+router.post(
+  '/change-password',
+  auth,
+  asyncHandler(
+    AuthController.changePassword
+  )
+);
+
+/* -------------------------------------------------------------------------- */
+/* ✅ 2FA                                                                     */
+/* -------------------------------------------------------------------------- */
+
+router.post(
+  '/2fa/enable',
+  asyncHandler(
+    AuthController.enable2FA
+  )
+);
+
+router.post(
+  '/2fa/verify',
+  asyncHandler(
+    AuthController.verify2FA
+  )
+);
+
+router.post(
+  '/2fa/verify-login',
+  asyncHandler(
+    AuthController.verifyAdmin2FA
+  )
+);
 
 module.exports = router;

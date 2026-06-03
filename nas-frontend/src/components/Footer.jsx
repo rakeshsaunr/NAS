@@ -1,4 +1,5 @@
-import React from "react";
+import { useState } from "react";
+import axios from "axios";
 import {
   FaFacebookF,
   FaTwitter,
@@ -25,7 +26,7 @@ const footerNav = [
     title: "Company",
     links: [
       { text: "About NAS", href: "/pages/about" },
-      { text: "Our Projects", href: "/pages/projects" },
+      { text: "Our Services", href: "/pages/services" },
       { text: "Careers", href: "/pages/careers" },
       { text: "Why Choose Us", href: "/pages/why-us" },
     ],
@@ -33,28 +34,28 @@ const footerNav = [
   {
     title: "Security Solutions",
     links: [
-      { text: "CCTV Solutions", href: "/pages/cctv" },
-      { text: "Video Door Phones", href: "/pages/video-door-phone" },
-      { text: "Biometric Systems", href: "/pages/biometric" },
-      { text: "Alarm Systems", href: "/pages/alarm-system" },
+      { text: "CCTV Solutions", href: "/product/cctv-surveillance" },
+      { text: "Video Door Phones", href: "/product/video-door-phone" },
+      { text: "Biometric Systems", href: "/product/biometric-systems" },
+      { text: "Alarm Systems", href: "/product/alarm-system" },
     ],
   },
   {
     title: "IT & Networking",
     links: [
-      { text: "WiFi Networking", href: "/pages/wifi-networking" },
-      { text: "EPABX Solutions", href: "/pages/epabx" },
-      { text: "Server Installation", href: "/pages/server-installation" },
-      { text: "AMC Support", href: "/pages/amc-support" },
+      { text: "WiFi Networking", href: "/product/wifi-networking" },
+      { text: "EPABX Solutions", href: "/product/epabx" },
+      { text: "Server Installation", href: "/product/server-installation" },
+      { text: "AMC Support", href: "/service/amc-services" },
     ],
   },
   {
     title: "Support & Legal",
     links: [
       { text: "Contact Us", href: "/pages/contact" },
-      { text: "Customer Support", href: "/pages/support" },
-      { text: "Privacy Policy", href: "/privacy-policy" },
-      { text: "Terms & Conditions", href: "/terms-and-conditions" },
+      { text: "Customer Support", href: "/support/customer-support" },
+      { text: "Privacy Policy", href: "/support/privacy-policy" },
+      { text: "Terms & Conditions", href: "/support/terms-condition" },
     ],
   },
 ];
@@ -91,6 +92,38 @@ const linkClass =
   "text-gray-600 text-sm font-medium transition-colors duration-300 hover:text-red-600";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/v1/newsletter/subscribe",
+        { email }
+      );
+      if (response.data && response.data.success) {
+        alert("Subscribed Successfully 🚀");
+        setEmail("");
+      } else {
+        alert((response.data && response.data.message) || "Something went wrong");
+      }
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        alert(err.response.data.message);
+      } else {
+        alert("Something went wrong");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <footer className="bg-neutral-50 text-black border-t border-gray-200">
       <div className="max-w-6xl mx-auto px-4 py-12">
@@ -150,15 +183,23 @@ const Footer = () => {
               Get latest updates about CCTV, Networking & Smart Security Solutions.
             </div>
           </div>
-          <form className="w-full max-w-md">
+          <form className="w-full max-w-md" onSubmit={handleSubscribe}>
             <div className="flex overflow-hidden rounded-full border border-gray-300 bg-white">
               <input
                 type="email"
                 placeholder="Enter your email"
                 className="flex-1 px-4 py-2 sm:py-3 border-none text-xs sm:text-sm outline-none bg-transparent"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
               />
-              <button className="bg-red-600 text-white px-6 text-xs sm:text-sm font-semibold transition-all duration-300 hover:bg-red-700">
-                Subscribe
+              <button
+                className="bg-red-600 text-white px-6 text-xs sm:text-sm font-semibold transition-all duration-300 hover:bg-red-700"
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? "Sending..." : "Subscribe"}
               </button>
             </div>
           </form>

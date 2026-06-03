@@ -1,353 +1,250 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Search, 
-  ShoppingCart, 
-  Phone, 
-  Mail, 
-  Menu, 
-  ChevronRight, 
-  ShieldCheck, 
-  Server, 
-  Cpu, 
-  Camera, 
-  Wifi, 
-  Database, 
-  Smartphone, 
-  HardDrive, 
-  Users, 
-  Globe, 
-  Award, 
-  MapPin, 
-  ChevronLeft, 
-  Filter 
-} from 'lucide-react';
+// No need for explicit import React for function components (React 17+)
+import {
+  Camera,
+  KeyRound,
+  Shield,
+  Flame
+} from "lucide-react";
 
-// --- Components ---
+// Security product/feature cards (modeled like BiometricSystems)
+const securityFeatures = [
+  {
+    title: "Surveillance Cameras",
+    icon: <Camera size={44} strokeWidth={2.2} className="text-blue-500" />,
+    color: "from-blue-100 to-gray-100",
+    description:
+      "Monitor and record premises 24/7—deter crime, gather evidence, and ensure staff and asset safety with high-definition cameras.",
+    tag: "Vision Everywhere",
+    tagColor: "bg-blue-500 text-white",
+    features: [
+      "Infrared & night view",
+      "App viewing & alerts",
+      "HD cloud storage"
+    ]
+  },
+  {
+    title: "Access Control",
+    icon: <KeyRound size={44} strokeWidth={2.2} className="text-green-500" />,
+    color: "from-green-100 to-emerald-100",
+    description:
+      "Restrict and monitor entry points using RFID, cards, or biometrics. Log every movement with flexible permissions and schedules.",
+    tag: "Authorized Entry",
+    tagColor: "bg-green-500 text-white",
+    features: [
+      "Biometric/RFID",
+      "Custom permissions",
+      "Detailed logs"
+    ]
+  },
+  {
+    title: "Intrusion Detection",
+    icon: <Shield size={44} strokeWidth={2.2} className="text-yellow-500" />,
+    color: "from-yellow-100 to-orange-100",
+    description:
+      "Protect after hours with smart motion sensors, door/window alerts, and real-time alarm notifications—fast response to threats.",
+    tag: "Instant Alerts",
+    tagColor: "bg-yellow-500 text-white",
+    features: [
+      "Motion & door sensors",
+      "Instant phone alert",
+      "Audible alarm"
+    ]
+  },
+  {
+    title: "Fire & Safety Alarms",
+    icon: <Flame size={44} strokeWidth={2.2} className="text-red-500" />,
+    color: "from-red-100 to-pink-100",
+    description:
+      "Safeguard life and property. Advanced smoke, fire, and gas sensors trigger evacuation and notify authorities automatically.",
+    tag: "Life Safety",
+    tagColor: "bg-red-500 text-white",
+    features: [
+      "Smoke & gas sensors",
+      "Auto notifications",
+      "24/7 active"
+    ]
+  },
+];
 
-const SolutionCard = ({ icon: Icon, title, desc, badge }) => (
-  <div className="bg-white group border border-gray-100 hover:border-gray-300 hover:shadow-xl transition-all p-3 rounded-md flex flex-col h-full max-w-[250px] mx-auto relative">
-    {badge && (
-      <div className="absolute top-2 left-2 bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm z-10 uppercase">
-        {badge}
-      </div>
-    )}
-    <div className="aspect-[1/1] bg-blue-50 flex items-center justify-center mb-3 overflow-hidden rounded group-hover:bg-white transition-colors" style={{ minHeight: 80 }}>
-      <div className="relative">
-        <Icon size={44} className="text-blue-300 group-hover:text-blue-900 group-hover:scale-110 transition-all duration-300" />
-        <div className="absolute -bottom-2 -right-2 bg-white p-1 rounded-full shadow-sm">
-          <ShieldCheck size={13} className="text-green-500" />
+const SecuritySolution = () => {
+  return (
+    <section className="bg-gradient-to-br from-white via-blue-50 to-gray-100 min-h-screen">
+      {/* HERO / BANNER */}
+      <div className="bg-[#0a1e36]">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center px-6 py-14 gap-8">
+          <div>
+            <span className="text-base uppercase tracking-widest text-blue-400 font-semibold mb-4 inline-block">
+              Security Partner
+            </span>
+            <h1 className="text-3xl md:text-5xl font-bold text-white mb-3">
+              Smart Business <span className="text-blue-300">Security Solutions</span>
+            </h1>
+            <p className="text-gray-200 md:text-lg mb-5 max-w-lg">
+              Defend your staff, data, and premises with intelligent surveillance, entry management, and reliable safety systems—fully managed, fast setup.
+            </p>
+            <button className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-bold px-4 py-2 rounded-md shadow-xl transition mb-2 text-sm">
+              Request Free Assessment
+            </button>
+            <div className="text-blue-200 text-xs mt-2">
+              <span className="font-black">500+</span> businesses protected
+            </div>
+          </div>
+          {/* Banner Image */}
+          <div className="relative">
+            <div className="absolute w-32 h-32 bg-blue-400/10 rounded-full blur-3xl left-8 top-1/3 -z-10"></div>
+            <img
+              src="/images/security/security-illustration.png"
+              alt="Security Service Banner"
+              className="w-40 md:w-52 object-contain mx-auto"
+            />
+          </div>
         </div>
       </div>
-    </div>
-    <div className="flex-grow flex flex-col">
-      <h3 className="text-gray-800 text-base font-semibold leading-tight mb-1 group-hover:text-blue-900 transition-colors">
-        {title}
-      </h3>
-      <div className="text-[11px] text-gray-500 mb-3 flex-1">
-        {desc}
-      </div>
-    </div>
-    <button className="w-full bg-gradient-to-r from-blue-700 via-blue-600 to-blue-400 text-white hover:from-orange-500 hover:to-blue-600 py-1.5 rounded font-bold uppercase text-[10px] transition-all flex items-center justify-center gap-2 mt-auto">
-      <ShoppingCart size={13} /> Enquire Now
-    </button>
-  </div>
-);
 
-const useOnClickOutside = (ref, handler) => {
-  useEffect(() => {
-    const listener = (event) => {
-      if (!ref.current || ref.current.contains(event.target)) return;
-      handler(event);
-    };
-    document.addEventListener('mousedown', listener);
-    return () => { document.removeEventListener('mousedown', listener); };
-  }, [ref, handler]);
+      {/* Products Grid - Ecommerce Style */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-14">
+        <h2 className="text-3xl text-center font-bold mb-2 text-gray-900">Best Security Features For You</h2>
+        <p className="text-center mb-10 text-gray-600">
+          Discover, compare and set up security solutions tailored for your workspace or property—nationwide support.
+        </p>
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+          {securityFeatures.map((feature) => (
+            <div
+              key={feature.title}
+              className={`bg-white rounded-2xl shadow-lg hover:shadow-xl flex flex-col transition hover:scale-105 relative border border-gray-100 group`}
+            >
+              {/* Tag */}
+              <span className={`absolute right-3 top-3 text-xs px-3 py-1 rounded-full font-semibold ${feature.tagColor} z-10`}>
+                {feature.tag}
+              </span>
+              {/* Icon */}
+              <div className="w-full h-36 flex items-center justify-center rounded-t-2xl overflow-hidden bg-gray-50 border-b">
+                <div className="flex items-center justify-center">{feature.icon}</div>
+              </div>
+              <div className="p-5 flex flex-col flex-1">
+                {/* Title */}
+                <h3 className="text-lg font-bold text-gray-900 group-hover:text-blue-700 mb-1">{feature.title}</h3>
+                {/* Description */}
+                <p className="text-gray-600 text-sm mb-2 line-clamp-2">{feature.description}</p>
+                {/* Features */}
+                <ul className="mb-3 space-y-1 text-sm text-gray-700">
+                  {feature.features.map((f, idx) => (
+                    <li key={idx} className="flex items-center gap-2">
+                      <span className="text-blue-500 font-bold">✔</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                {/* Enquire Button */}
+                <a
+                  href={`/pages/enquiry-form?product=${encodeURIComponent(feature.title)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-auto bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-semibold rounded-md py-1.5 px-3 transition w-full text-sm text-center block"
+                >
+                  Enquire Now
+                </a>
+           
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Trust & Assurance Section */}
+      <div className="bg-white border-t border-blue-100 py-10">
+        <div className="max-w-6xl mx-auto px-5 grid md:grid-cols-3 gap-10">
+          <div className="flex items-center gap-4">
+            <span className="bg-blue-50 rounded-full p-3">
+              <svg width="28" height="28" fill="none"><circle cx="14" cy="14" r="12" stroke="#2563eb" strokeWidth="2"/><text x="14" y="19" textAnchor="middle" fontSize="18" fill="#2563eb" fontFamily="Arial" fontWeight="bold">✓</text></svg>
+            </span>
+            <div>
+              <div className="font-bold text-gray-900 mb-0.5">Professional Installation</div>
+              <div className="text-gray-500 text-sm">Anywhere in India</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="bg-blue-50 rounded-full p-3">
+              <svg width="28" height="28" fill="none"><circle cx="14" cy="14" r="12" stroke="#2563eb" strokeWidth="2"/><text x="14" y="19" textAnchor="middle" fontSize="18" fill="#2563eb" fontFamily="Arial" fontWeight="bold">₹</text></svg>
+            </span>
+            <div>
+              <div className="font-bold text-gray-900 mb-0.5">Transparent Pricing</div>
+              <div className="text-gray-500 text-sm">No hidden charges</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="bg-blue-50 rounded-full p-3">
+              <svg width="28" height="28" fill="none"><circle cx="14" cy="14" r="12" stroke="#2563eb" strokeWidth="2"/><text x="14" y="19" textAnchor="middle" fontSize="18" fill="#2563eb" fontFamily="Arial" fontWeight="bold">🕑</text></svg>
+            </span>
+            <div>
+              <div className="font-bold text-gray-900 mb-0.5">Service Warranty</div>
+              <div className="text-gray-500 text-sm">Priority tech support</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Why Choose Section */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-16 flex flex-col md:flex-row md:items-center md:justify-between gap-10">
+        <div className="flex-1 bg-gradient-to-br from-blue-200/60 to-white rounded-2xl p-8 mb-8 md:mb-0">
+          <h3 className="font-black text-2xl text-blue-800 mb-4 flex items-center gap-2">
+            <span>Why Choose Security?</span>
+            <svg className="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
+              <path d="M12 20v-6m0 0v-2a2 2 0 1 1 4 0v8a2 2 0 1 1-4 0z" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </h3>
+          <ul className="list-none space-y-4 text-lg text-gray-800 pt-2">
+            <li className="flex items-start gap-2">
+              <span className="text-blue-500 mt-1">✓</span>
+              Real-time surveillance & instant notification of events
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-500 mt-1">✓</span>
+              Access control—grant, revoke, and track movement
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-500 mt-1">✓</span>
+              Automated defense—alarm, doors, and responses
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-500 mt-1">✓</span>
+              Compliance-ready records for audit and safety
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-blue-500 mt-1">✓</span>
+              Professional design, installation, and maintenance
+            </li>
+          </ul>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <img
+            src="/images/security/security-illustration.png"
+            alt="Security Illustration"
+            className="max-w-xs md:max-w-sm w-full"
+            loading="lazy"
+          />
+        </div>
+      </div>
+
+      {/* Soft Animation (reuse SCSS) */}
+      <style>{`
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: spin-slow 18s linear infinite;
+        }
+        .line-clamp-2 {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      `}</style>
+    </section>
+  );
 };
 
-const FilterDropdown = ({
-  filters,
-  onVerticalChange
-}) => {
-  const [open, setOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  useOnClickOutside(dropdownRef, () => setOpen(false));
-
-  const domains = [
-    'Home & Apartment',
-    'Retail/Showroom',
-    'Offices',
-    'School/College',
-    'Hospitals',
-    'Societies/Gates',
-    'Hotel/Restaurants',
-    'Warehouse/Factory'
-  ];
-
-  return (
-    <div className="relative inline-block w-full md:w-auto z-20" ref={dropdownRef}>
-      <button
-        className="flex items-center gap-2 px-3 py-1.5 bg-white border rounded text-blue-900 font-bold uppercase text-xs hover:bg-gray-50 shadow-sm transition mb-2 w-full md:w-auto"
-        onClick={() => setOpen(o => !o)}
-        type="button"
-      >
-        <Filter size={13} />
-        Filters
-        <svg className={`ml-2 transition-transform ${open ? 'rotate-180' : ''}`} width="13" height="13" fill="none" viewBox="0 0 24 24">
-          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
-      </button>
-      {open && (
-        <div className="absolute left-0 mt-2 bg-white border rounded shadow-xl w-[240px] max-w-[94vw] p-3 space-y-3">
-          <div>
-            <h4 className="font-bold text-gray-800 mb-2 text-[11px] uppercase">Choose Vertical</h4>
-            <div className="space-y-1 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
-              {domains.map(domain => (
-                <label key={domain} className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer hover:text-blue-600">
-                  <input
-                    type="checkbox"
-                    className="rounded text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
-                    checked={filters.verticals.includes(domain)}
-                    onChange={() => onVerticalChange(domain)}
-                  />{domain}
-                </label>
-              ))}
-            </div>
-          </div>
-          <div>
-            <button className="w-full bg-gradient-to-r from-blue-700 via-blue-600 to-blue-400 text-white py-1.5 rounded text-[11px] font-bold uppercase hover:from-orange-500 hover:to-blue-600 transition-colors mt-1">Need Bulk Solutions?</button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-function filterSolutions(solutions, filters) {
-  if (!filters.verticals.length) return solutions;
-  return solutions.filter(
-    sol => sol.domains.some(dom => filters.verticals.includes(dom))
-  );
-}
-
-export default function SecuritySolution() {
-  const [filters, setFilters] = useState({
-    verticals: []
-  });
-
-  const handleVerticalChange = (domain) => {
-    setFilters(f => ({
-      ...f,
-      verticals: f.verticals.includes(domain)
-        ? f.verticals.filter(b => b !== domain)
-        : [...f.verticals, domain],
-    }));
-  };
-
-  const solutions = [
-    {
-      title: "CCTV Video Surveillance",
-      desc: "IP, Analog & Wireless Cameras, DVRs/NVRs for every scale – remote/mobile view, night vision, analytics.",
-      icon: Camera,
-      badge: "TOP PICK",
-      domains: [
-        'Home & Apartment', 'Retail/Showroom', 'Offices', 'Societies/Gates', 'Warehouse/Factory', 'School/College'
-      ]
-    },
-    {
-      title: "Access Control & Biometric",
-      desc: "Smart card/fingerprint/face devices. Restrict entry, maintain attendance, and integrate with doors/gates.",
-      icon: Cpu,
-      badge: "POPULAR",
-      domains: [
-        'Offices', 'School/College', 'Hospitals', 'Societies/Gates', 'Warehouse/Factory'
-      ]
-    },
-    {
-      title: "Video Door Phones",
-      desc: "Interact safely with visitors via video/audio before granting access – standalone & multi-apartment solutions.",
-      icon: Smartphone,
-      badge: "",
-      domains: [
-        'Home & Apartment', 'Societies/Gates', 'Hotel/Restaurants'
-      ]
-    },
-    {
-      title: "Intrusion Alarm Systems",
-      desc: "Motion, magnetic and smoke detectors with siren alerts. Get notified instantly of break-in attempts.",
-      icon: Server,
-      badge: "",
-      domains: [
-        'Home & Apartment', 'Retail/Showroom', 'Offices', 'Warehouse/Factory'
-      ]
-    },
-    {
-      title: "Smart Automation",
-      desc: "Remotely control lights, appliances, and energy usage. Enhance security with scheduled scenes and monitoring.",
-      icon: Wifi,
-      badge: "NEW",
-      domains: [
-        'Home & Apartment', 'Offices', 'Hotel/Restaurants'
-      ]
-    },
-    {
-      title: "Gate & Boom Barrier Automation",
-      desc: "Secure, contactless vehicle access for societies/facilities—ANPR, RFID, remote opening.",
-      icon: HardDrive,
-      badge: "ADVANCED",
-      domains: [
-        'Societies/Gates', 'Warehouse/Factory', 'Hotel/Restaurants'
-      ]
-    },
-    {
-      title: "IT Networking & Server Racks",
-      desc: "Structured cabling, Wi-Fi, firewalls, server & storage solutions. Reliable for business-critical ops.",
-      icon: Database,
-      badge: "",
-      domains: [
-        'Offices', 'Retail/Showroom', 'School/College', 'Warehouse/Factory'
-      ]
-    },
-    {
-      title: "Fire Safety Systems",
-      desc: "Fire alarm panels, detectors, extinguishers and evacuation alerts for active protection across premises.",
-      icon: Award,
-      badge: "",
-      domains: [
-        'School/College', 'Offices', 'Warehouse/Factory', 'Hotel/Restaurants', 'Hospitals'
-      ]
-    },
-  ];
-
-  const filteredSolutions = filterSolutions(solutions, filters);
-
-  return (
-    <div className="min-h-screen bg-blue-50 font-sans text-gray-900 pb-20">
-      
-      {/* Hero Header */}
-      <div className="bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500 text-white py-10 px-4 text-center border-b-4 border-orange-400">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl md:text-4xl font-bold mb-2">Security Solutions for Every Need</h1>
-          <p className="text-blue-100 text-xs md:text-base max-w-2xl mx-auto">
-            Protect your home, office, and business with our advanced security technologies.<br />
-            Customized solutions for every industry – ab har jagah sureksha!
-          </p>
-        </div>
-      </div>
-
-      <main className="max-w-7xl mx-auto px-3 py-8">
-        <div className="flex flex-col lg:flex-row gap-5">
-
-          {/* Sidebar - Hidden on md+ */}
-          <aside className="hidden lg:block w-full lg:w-60 space-y-4">
-            <div className="bg-white p-3 border rounded shadow-sm">
-              <div className="flex items-center gap-2 mb-3 text-blue-900 font-bold uppercase text-xs border-b pb-2">
-                <Filter size={13} /> <span>Choose Vertical</span>
-              </div>
-              
-              <div className="space-y-3">
-                <div>
-                  <div className="space-y-1 max-h-32 overflow-y-auto pr-1 custom-scrollbar">
-                    {[
-                      'Home & Apartment',
-                      'Retail/Showroom',
-                      'Offices',
-                      'School/College',
-                      'Hospitals',
-                      'Societies/Gates',
-                      'Hotel/Restaurants',
-                      'Warehouse/Factory'
-                    ].map(domain => (
-                      <label key={domain} className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer hover:text-blue-600">
-                        <input
-                          type="checkbox"
-                          className="rounded text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
-                          checked={filters.verticals.includes(domain)}
-                          onChange={() => handleVerticalChange(domain)}
-                        />{domain}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-blue-50 p-3 rounded border border-blue-100">
-              <h4 className="font-bold text-blue-900 text-xs mb-1">Need Bulk Solutions?</h4>
-              <p className="text-[11px] text-blue-700 mb-3">Get special pricing and expert guidance for large requirements or multi-site security.</p>
-              <button className="w-full bg-gradient-to-r from-blue-700 via-blue-600 to-blue-400 text-white py-1.5 rounded text-[11px] font-bold uppercase hover:from-orange-500 hover:to-blue-600 transition-colors">Contact Team</button>
-            </div>
-          </aside>
-
-          {/* Main Content Area */}
-          <div className="flex-grow">
-
-            {/* Top Toolbar */}
-            <div className="bg-white p-2 border rounded mb-5 flex flex-col md:flex-row justify-between items-center gap-3 shadow-sm">
-              <div className="text-xs text-gray-500">Showing <span className="font-bold text-gray-800">{filteredSolutions.length}</span> Solutions</div>
-              <div className="flex gap-3 w-full md:w-auto items-center">
-                  {/* Filter Dropdown - visible on mobile/tablet */}
-                  <span className="block w-full md:w-auto md:hidden">
-                    <FilterDropdown 
-                      filters={filters}
-                      onVerticalChange={handleVerticalChange}
-                    />
-                  </span>
-                  <select className="flex-grow md:w-40 p-1.5 border border-gray-200 rounded text-xs outline-none focus:border-blue-500">
-                      <option>Sort by: Most Relevant</option>
-                      <option>Newest First</option>
-                      <option>Industry</option>
-                  </select>
-              </div>
-            </div>
-
-            {/* Solution Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                {filteredSolutions.map((s, i) => (
-                    <SolutionCard 
-                        key={i}
-                        icon={s.icon}
-                        title={s.title}
-                        desc={s.desc}
-                        badge={s.badge}
-                    />
-                ))}
-            </div>
-
-            {/* Load More / Pagination */}
-            <div className="mt-8 flex flex-col items-center gap-4">
-              <button className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-400 text-white border-0 px-6 py-2 rounded-full font-bold uppercase text-xs hover:from-orange-500 hover:to-blue-600 transition-all">
-                Load More Solutions
-              </button>
-              <div className="flex items-center gap-1">
-                  <button className="w-7 h-7 flex items-center justify-center rounded border text-gray-400 hover:bg-gray-100 transition-colors"><ChevronLeft size={13} /></button>
-                  <button className="w-7 h-7 flex items-center justify-center rounded border bg-blue-900 text-white font-bold text-xs">1</button>
-                  <button className="w-7 h-7 flex items-center justify-center rounded border hover:bg-gray-100 text-xs">2</button>
-                  <button className="w-7 h-7 flex items-center justify-center rounded border hover:bg-gray-100 text-xs">3</button>
-                  <button className="w-7 h-7 flex items-center justify-center rounded border text-gray-400 hover:bg-gray-100 transition-colors"><ChevronRight size={13} /></button>
-              </div>
-            </div>
-            {/* No Enquiry Form as per CCTV page */}
-          </div>
-        </div>
-      </main>
-
-      {/* Trust Badges */}
-      <section className="bg-white border-y py-8 mt-6">
-        <div className="max-w-7xl mx-auto px-3 grid grid-cols-2 md:grid-cols-4 gap-5">
-            {[
-                { title: "Pan India Projects", sub: "Deployment across Bharat", icon: Globe },
-                { title: "100% Genuine", sub: "Brand Guarantee", icon: ShieldCheck },
-                { title: "Expert Solutions", sub: "Planning to Installation", icon: Users },
-                { title: "Safe Payments", sub: "Encrypted & Trusted", icon: Award }
-            ].map((item, idx) => (
-                <div key={idx} className="flex flex-col items-center text-center">
-                    <div className="mb-3 text-blue-900"><item.icon size={22} /></div>
-                    <h4 className="font-bold text-xs uppercase mb-1">{item.title}</h4>
-                    <p className="text-[9px] text-gray-500 uppercase tracking-widest">{item.sub}</p>
-                </div>
-            ))}
-        </div>
-      </section>
-    </div>
-  );
-}
+export default SecuritySolution;

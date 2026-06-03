@@ -3,75 +3,30 @@ const mongoose = require("mongoose");
 const departmentSchema =
   new mongoose.Schema(
     {
-      // ===========================================
-      // BASIC DETAILS
-      // ===========================================
+      // =====================================
+      // DEPARTMENT CODE
+      // =====================================
 
-      name: {
+      departmentCode: {
+        type: String,
+        unique: true,
+      },
+
+      // =====================================
+      // DEPARTMENT NAME
+      // =====================================
+
+      departmentName: {
         type: String,
         required: true,
         trim: true,
       },
 
-      code: {
-        type: String,
-        trim: true,
-        uppercase: true,
-      },
+      // =====================================
+      // REMARK
+      // =====================================
 
-      description: {
-        type: String,
-        trim: true,
-      },
-
-      // ===========================================
-      // CONTACT DETAILS
-      // ===========================================
-
-      contactPerson: {
-        type: String,
-        trim: true,
-      },
-
-      contactNumber: {
-        type: String,
-        trim: true,
-      },
-
-      email: {
-        type: String,
-        trim: true,
-        lowercase: true,
-      },
-
-      // ===========================================
-      // STATUS
-      // ===========================================
-
-      status: {
-        type: String,
-        enum: [
-          "Active",
-          "Inactive",
-        ],
-        default: "Active",
-      },
-
-      isActive: {
-        type: Boolean,
-        default: true,
-      },
-
-      // ===========================================
-      // EXTRA DETAILS
-      // ===========================================
-
-      createdBy: {
-        type: String,
-        trim: true,
-      },
-
-      remarks: {
+      remark: {
         type: String,
         trim: true,
       },
@@ -81,9 +36,37 @@ const departmentSchema =
     }
   );
 
-const Department = mongoose.model(
-  "Department",
-  departmentSchema
+// =====================================
+// AUTO GENERATE CODE
+// =====================================
+
+departmentSchema.pre(
+  "save",
+  async function (next) {
+    try {
+      const total =
+        await mongoose
+          .model("Department")
+          .countDocuments();
+
+      if (!this.departmentCode) {
+        this.departmentCode = `DEP-${String(
+          total + 1
+        ).padStart(4, "0")}`;
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  }
 );
+
+const Department =
+  mongoose.models.Department ||
+  mongoose.model(
+    "Department",
+    departmentSchema
+  );
 
 module.exports = Department;

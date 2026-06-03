@@ -1,27 +1,55 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+
 require("dotenv").config();
 
-const { UserRepository } = require("../repositories");
-const { AppError } = require("../utils/errors");
+const userRepository = require(
+  "../repositories/auth-repository"
+);
 
-const userRepository = new UserRepository();
+const { AppError } = require(
+  "../utils/errors"
+);
 
-const JWT_SECRET = process.env.JWT_SECRET || "replace_this_secret";
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "1d";
+const JWT_SECRET =
+  process.env.JWT_SECRET ||
+  "replace_this_secret";
 
-// 🔹 Generate JWT token
+const JWT_EXPIRES_IN =
+  process.env.JWT_EXPIRES_IN || "1d";
+
+// 🔹 GENERATE JWT TOKEN
 function generateToken(id, role) {
-  return jwt.sign({ userId: id, role }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  return jwt.sign(
+    {
+      userId: id,
+      role,
+    },
+    JWT_SECRET,
+    {
+      expiresIn: JWT_EXPIRES_IN,
+    }
+  );
 }
 
-// 🔹 Build token + user response
-function buildAuthResponse(id, role, user) {
-  // ✅ Ensure role always correct
-  const finalRole = role || user.role || "user";
-  console.log("✅ BUILDING TOKEN WITH ROLE:", finalRole);
+// 🔹 BUILD TOKEN RESPONSE
+function buildAuthResponse(
+  id,
+  role,
+  user
+) {
+  const finalRole =
+    role || user.role || "Staff";
 
-  const token = generateToken(id, finalRole);
+  console.log(
+    "✅ BUILDING TOKEN WITH ROLE:",
+    finalRole
+  );
+
+  const token = generateToken(
+    id,
+    finalRole
+  );
 
   return {
     token,
@@ -34,51 +62,146 @@ function buildAuthResponse(id, role, user) {
   };
 }
 
-// 🔹 SIGNUP — hashes password before saving
-const signUp = async (userData) => {
-  const existing = await userRepository.findByEmail(userData.email);
-  if (existing) throw new AppError(409, "User already exists");
+// 🔹 SIGNUP
+const signUp = async (
+  userData
+) => {
+  // ✅ CHECK EXISTING USER
+  const existing =
+    await userRepository.getUserByEmail(
+      userData.email
+    );
 
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(userData.password, salt);
-  userData.password = hashedPassword;
+  console.log(
+    "EXISTING USER:",
+    existing
+  );
 
-  // ✅ Default role if not provided
-  if (!userData.role) userData.role = "user";
+  // ✅ USER ALREADY EXISTS
+  if (existing) {
+    throw new AppError(
+      409,
+      "User already exists"
+    );
+  }
 
-  const newUser = await userRepository.create(userData);
-  if (!newUser) throw new AppError(500, "User could not be created");
+  // ✅ HASH PASSWORD
+  const salt =
+    await bcrypt.genSalt(10);
 
-  const tokenObj = buildAuthResponse(newUser._id, newUser.role, newUser);
-  return { newUser, tokenObj };
+  const hashedPassword =
+    await bcrypt.hash(
+      userData.password,
+      salt
+    );
+
+  // ✅ SAVE HASHED PASSWORD
+  userData.password =
+    hashedPassword;
+
+  // ✅ DEFAULT ROLE
+  if (!userData.role) {
+    userData.role = "Staff";
+  }
+
+  // ✅ CREATE USER
+  const newUser =
+    await userRepository.create(
+      userData
+    );
+
+  if (!newUser) {
+    throw new AppError(
+      500,
+      "User could not be created"
+    );
+  }
+
+  // ✅ TOKEN RESPONSE
+  const tokenObj =
+    buildAuthResponse(
+      newUser._id,
+      newUser.role,
+      newUser
+    );
+
+  return {
+    newUser,
+    tokenObj,
+  };
 };
 
-// 🔹 LOGIN — checks password properly
-const login = async (email, password) => {
-  const user = await userRepository.findByEmail(email);
-  if (!user) throw new AppError(404, "User not found. Please sign up first.");
+// 🔹 LOGIN
+const login = async (
+  email,
+  password
+) => {
+  // ✅ FIND USER
+  const user =
+    await userRepository.getUserByEmail(
+      email
+    );
 
-  console.log("🟢 USER FOUND:", user.email);
-  console.log("🔍 USER ROLE FROM DB:", user.role);
-  console.log("HASH IN DB:", user.password);
-  console.log("PASSWORD ENTERED:", password);
+  if (!user) {
+    throw new AppError(
+      404,
+      "User not found. Please sign up first."
+    );
+  }
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  console.log("PASSWORD MATCH RESULT:", isMatch);
+  console.log(
+    "🟢 USER FOUND:",
+    user.email
+  );
 
-  if (!isMatch) throw new AppError(401, "Invalid credentials.");
+  console.log(
+    "🔍 USER ROLE:",
+    user.role
+  );
 
-  // ✅ Ensure role from DB is used (force lowercase)
-  const role = user.role ? user.role.toLowerCase() : "user";
-  console.log("✅ BUILDING TOKEN WITH ROLE:", role);
+  // ✅ PASSWORD MATCH
+  const isMatch =
+    await bcrypt.compare(
+      password,
+      user.password
+    );
 
-  return buildAuthResponse(user._id, role, user);
+  console.log(
+    "PASSWORD MATCH RESULT:",
+    isMatch
+  );
+
+  if (!isMatch) {
+    throw new AppError(
+      401,
+      "Invalid credentials."
+    );
+  }
+
+  // ✅ ROLE
+  const role = user.role
+    ? user.role
+    : "Staff";
+
+  // ✅ RETURN TOKEN
+  return buildAuthResponse(
+    user._id,
+    role,
+    user
+  );
 };
 
-// 🔹 Check if user exists
-async function userExist(email) {
-  return await userRepository.findByEmail(email);
-}
+// 🔹 CHECK USER EXISTS
+const userExist = async (
+  email
+) => {
+  const user =
+    await userRepository.getUserByEmail(
+      email
+    );
+
+  return user || null;
+};
 
 module.exports = {
   signUp,

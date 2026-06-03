@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 
 // Animated slide data
 const slideImages = [
-  "/images/cctv-slide.png",
-  "/images/smart-home-slide.png",
-  "/images/security-slide.png",
-  "/images/networking-slide.png",
+  "https://res.cloudinary.com/dz4zdzuaj/image/upload/q_auto/f_auto/v1778657754/ChatGPT_Image_May_13_2026_01_05_06_PM_ntyqnm.png",
+  "https://res.cloudinary.com/dz4zdzuaj/image/upload/q_auto/f_auto/v1778659634/ChatGPT_Image_May_13_2026_01_36_57_PM_cm1evy.png",
+  "https://res.cloudinary.com/dz4zdzuaj/image/upload/q_auto/f_auto/v1778659727/ChatGPT_Image_May_13_2026_01_38_34_PM_exu7jf.png",
+  "https://res.cloudinary.com/dz4zdzuaj/image/upload/q_auto/f_auto/v1778659844/ChatGPT_Image_May_13_2026_01_40_33_PM_swddev.png",
 ];
 
 const slideAlts = [
@@ -41,25 +41,21 @@ const slideDescriptions = [
   "Fast, robust networking for reliable connectivity and cutting-edge communication infrastructure.",
 ];
 
-const AUTO_SLIDE_INTERVAL = 3000;
-
 const ANIMATION_IN = "slidein-fade";
 const ANIMATION_OUT = "slideout-fade";
+
+// BG video url updated as requested
+const HERO_BG_VIDEO =
+  "https://res.cloudinary.com/dz4zdzuaj/video/upload/v1778662672/107773-678526591_gfyfan.mp4";
 
 const Hero = () => {
   const [current, setCurrent] = useState(0);
   const [animation, setAnimation] = useState(ANIMATION_IN);
-  const timeoutRef = useRef(null);
   const changing = useRef(false);
 
-  // Slide auto cycle
-  useEffect(() => {
-    timeoutRef.current = setTimeout(() => handleNext(), AUTO_SLIDE_INTERVAL);
-    return () => clearTimeout(timeoutRef.current);
-    // eslint-disable-next-line
-  }, [current]);
+  // NOTE: Video timer removed, no auto-advance
 
-  // Helper to transition to next/prev with anima
+  // Helper to transition to next/prev with animation
   function handleNext(nextIdx = null) {
     if (changing.current) return;
     changing.current = true;
@@ -83,8 +79,22 @@ const Hero = () => {
   }
 
   return (
-    <section className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-6 py-20 flex flex-col md:flex-row items-center justify-between relative">
+    <section className="relative text-black overflow-x-hidden">
+      {/* BG video layer */}
+      <video
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        autoPlay
+        loop
+        muted
+        playsInline
+      >
+        <source src={HERO_BG_VIDEO} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      {/* Overlay to boost contrast over video */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-r from-white via-orange-100 to-orange-200 opacity-90 pointer-events-none"></div>
+
+      <div className="relative z-20 max-w-7xl mx-auto px-6 py-20 flex flex-col md:flex-row items-center justify-between">
         {/* Left Content ● Animated Headline & Description */}
         <div className="md:w-1/2 space-y-6">
           <h1
@@ -97,7 +107,7 @@ const Hero = () => {
           </h1>
           <p
             className={`
-              text-lg text-gray-100 min-h-[3.3rem] transition-all
+              text-lg text-gray-700 min-h-[3.3rem] transition-all
               ${animation === ANIMATION_IN ? "hero-desc-in" : "hero-desc-out"}
             `}
           >
@@ -105,17 +115,23 @@ const Hero = () => {
           </p>
 
           <div className="flex gap-4">
-            <button className="bg-white text-red-600 font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-100 transition">
+            <a
+              href="/quote"
+              className="bg-black text-white font-semibold px-6 py-3 rounded-lg shadow hover:bg-gray-900 transition"
+            >
               Get Quote
-            </button>
-            <button className="border border-white px-6 py-3 rounded-lg hover:bg-white hover:text-red-600 transition">
+            </a>
+            <a
+              href="/pages/contact"
+              className="border border-black px-6 py-3 rounded-lg hover:bg-black hover:text-white transition"
+            >
               Contact Us
-            </button>
+            </a>
           </div>
         </div>
         {/* Right Animated Design Slider */}
         <div className="md:w-1/2 mt-10 md:mt-0 flex flex-col items-center justify-center relative min-h-[280px]">
-          <div className="relative flex items-center h-[230px] md:h-[300px] w-80 md:w-[400px] overflow-hidden rounded-xl shadow-lg bg-white/10">
+          <div className="relative flex items-center h-[230px] md:h-[300px] w-80 md:w-[400px] overflow-hidden rounded-xl shadow-lg bg-white/30">
             {/* Slide icons (prev/next) removed */}
             <div className="flex-1 flex justify-center items-center w-full h-full">
               <img
@@ -140,7 +156,7 @@ const Hero = () => {
                   ${
                     current === idx
                       ? "bg-yellow-300 scale-125 ring-2 ring-yellow-200"
-                      : "bg-white bg-opacity-40"
+                      : "bg-black bg-opacity-20"
                   }
                   transition-all duration-300`}
                 aria-label={`Go to slide ${idx + 1}`}

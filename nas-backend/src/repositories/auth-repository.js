@@ -1,15 +1,26 @@
 const CrudRepository = require("./crud-repository");
-const { UserModel } = require('../models');
+
+const User = require("../models/auth-model");
 
 class UserRepository extends CrudRepository {
-    constructor() {
-        super(UserModel);
-    }
+  constructor() {
+    super(User);
+  }
 
-    async findByEmail(email) {
-        // ✅ include password and passwordHash explicitly
-        return this.model.findOne({ email }).select('+password +passwordHash');
-    }
+  // ✅ FIND USER BY EMAIL
+  async findByEmail(email) {
+    return await this.model
+      .findOne({ email })
+      .select("+password");
+  }
+
+  // ✅ GET USER BY EMAIL
+  async getUserByEmail(email) {
+    return await this.findByEmail(
+      email
+    );
+  }
 }
 
-module.exports = UserRepository;
+// ✅ EXPORT INSTANCE
+module.exports = new UserRepository();
